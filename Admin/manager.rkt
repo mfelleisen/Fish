@@ -103,7 +103,7 @@
 (define (manager lop0 #:time-out (t-o 3) #:fixed [f #f] #:size (s (list 5 5)))
   (define run-one-game
     (if f
-        (λ (lop) <(referee #f #:size s #:time-out t-o #:lop lop #:fixed f))
+        (λ (lop) (referee #f #:size s #:time-out t-o #:lop lop #:fixed f))
         (λ (lop) (referee #f #:size s #:time-out t-o #:lop lop))))
 
   (match-define (list starters cheaters0)

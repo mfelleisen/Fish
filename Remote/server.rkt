@@ -137,7 +137,7 @@
         (handle-evt send-players (stop-or-resume collect-players send-players players)))])))
 
 #; {[[Listof Player] -> Void] Channel [Listof Player] -> Void}
-(define ((stop-or-resume collect-players send-players players) g)
+(define ((stop-or-resume collect-players send-players players) _)
   (cond
     [(>= (length players) MIN-PLAYERS) (channel-put send-players players)]
     [else (channel-put send-players #false) (collect-players players)]))
