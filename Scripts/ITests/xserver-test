@@ -1,0 +1,81 @@
+#! /bin/sh
+#| -*- racket -*-
+exec racket -tm "$0" -- ${1+"$@"}
+|#
+#lang racket
+
+;; main p:port-number (between 10,000 and 60,000) launches a server on this port 
+
+(provide main)
+
+;; ---------------------------------------------------------------------------------------------------
+(require Fish/Scripts/Private/run-server-client)
+(require SwDev/Testing/communication)
+(require SwDev/Testing/harness)
+(require SwDev/Testing/make-client)
+
+(require (submod Fish/Admin/manager examples))
+(require Fish/Player/player)
+
+;; ---------------------------------------------------------------------------------------------------
+(define TIME (+ (+ 30 30) 60))
+(define BASE (get-starter-port))
+
+(define (posn->invalid-json p) (cons 1 p))
+(define (posn->ill-formed p) (broken (~a p)))
+(define player (new player%))
+(define invalid-player (list player posn->invalid-json))
+(define illform-player (list player posn->ill-formed))
+
+(define all
+  `[[,(cons #f 5players)              [1 0]  " 6 players, one fails to send a name"]
+    [,(cons invalid-player 5players)  [1 1]  " 6 players, one sends invalid json"]
+    [,(cons illform-player 5players)  [1 1]  " 6 players, one sends ill-formed json"]
+    [,5players  ,5players-counted     " 5 ordinary players"]
+    [,10players ,10players-counted    "10 ordinary players"]
+    [,10mixed   ,10mixed-counted      " 5 ordinary players; 5 bad ones, one per call"]
+    [,2+bads    ,2+bads-counted       " 2 ordinary players; 4 bad ones, incl. end-of-tournament"]
+    [,6+bads    ,6+bads-counted       " 6 ordinary players; 4 bad ones"]])
+(define tests# (length all))
+
+(define (main path-to-student-xserver)
+  (define succs# 
+    (for/fold ([success 0]) ([scenario all] [i (in-naturals)])
+      (match-define [list players expected explanation] scenario)
+      (+ (run-a-test path-to-student-xserver (+ BASE i) players expected explanation) success)))
+  (set-starter-port (+ BASE tests#))
+  (report-results succs# tests#))
+
+;; ---------------------------------------------------------------------------------------------------
+#; {PathString Port# {Listof Player} [List N N] -> Void}
+(define (run-a-test path-to-student-xserver port players expected explanation)
+  (cond
+    [(not (file-exists? path-to-student-xserver))
+     (displayln `[failure: ,path-to-student-xserver does not exist]) 0]
+    [(not (member 'execute (file-or-directory-permissions path-to-student-xserver)))
+     (displayln `[failure: ,path-to-student-xserver is not executable]) 0]
+    [else 
+     (define-values (_ __ tear-down) (local-setup (λ () (run-clients port players LOCALHOST))))
+  
+     (define-values (in _out tear-down-students)
+       [(make-setup path-to-student-xserver (map ~a (list port)) (λ (in out) (values in out)))])
+     
+     (define result 
+       (parameterize ((io-time-out TIME))
+         (read-message in)))
+  
+     (tear-down)
+     (tear-down-students)
+
+     (displayln `[the scenario sets up ,explanation])
+
+     (match expected
+       [[list (? natural?) (? natural?)]
+        (cond
+          [(equal? result expected) 1]
+          [else (displayln `[failure: actual result: ,result expected: ,expected]) 0])]
+       [(list [list (? natural?) (? natural?)] [list (? natural?) (? natural?)])
+        (cond
+          [(or (equal? result (first expected)) (equal? result (second expected))) 1]
+          [else (displayln `[failure: actual result: ,result expected: ,expected]) 0])]
+       [_ (error 'server-tests "catastrophe!! : ~e" expected)])]))

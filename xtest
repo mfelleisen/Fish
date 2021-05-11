@@ -1,0 +1,22 @@
+#!/bin/bash 
+
+echo "gc-ing" 
+rm -rf *~ */*~ ; rm -rf errors.txt 
+
+echo "making"
+time raco make */*.rkt
+
+echo "testing"
+echo "start" > errors.txt
+time raco test Common/*.rkt 2>> errors.txt
+time raco test Player/*.rkt 2>> errors.txt
+time raco test Admin/*.rkt  2>> errors.txt
+time raco test Remote/*.rkt  2>> errors.txt
+ 
+echo "grepping" 
+if grep --quiet "non-zero exit" errors.txt; then 
+   cat errors.txt 
+else 
+   tail -1 errors.txt
+   grep location errors.txt
+fi

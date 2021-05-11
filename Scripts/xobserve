@@ -1,0 +1,92 @@
+#! /bin/sh
+#| -*- racket -*-
+exec racket -tm "$0" -- ${1+"$@"}
+|#
+#lang racket
+
+;; usage:
+;; ./xobserve fish = F players = P rows = R columns = C depth = D
+;; for F, P, R, C and D in Naturals
+;; The command line may specify these parameters in any order, abd every field is optional.
+;; 
+;; example: 
+;; ./xobserve fish=5 players = 4 row = 2 columns = 9 
+
+;; main n:natural runs a game with n AI players and one human controled player, plus one observer 
+
+(provide main)
+
+;; ---------------------------------------------------------------------------------------------------
+(require Fish/Admin/referee)
+(require Fish/Admin/game-observer)
+(require Fish/Common/game-state)
+(require Fish/Player/player)
+(require Fish/Player/human)
+
+;; ---------------------------------------------------------------------------------------------------
+(module+ main
+  (apply main (vector->list (current-command-line-arguments))))
+
+(define (main . n)
+  (define-values (player# rows cols fish depth) (parse-args n))
+
+  (define names   (take '("Benjamin" "Aria" "Emma" "Rachel") player#))
+  (define players (map (λ (n) (new player% [depth depth])) names))
+  (define state0  (create-state rows cols players #:fixed fish))
+  (match-define (list rankings failures) (referee state0 #:time-out 5 #:observers (list observer)))
+
+  (report-results names players rankings failures))
+
+#; {[Listof String] [Listof [Listof [Instanceof Player]]] [Listof [Instanceof Player]] -> Void}
+(define (report-results names players rankings failures)
+  (for ([f failures]) (displayln `[,(match-name names players f) failed or cheated]))
+  (for ([r rankings] [p (in-naturals)])
+    (for ([a-player r])
+      (displayln `[,(match-name names players a-player) placed ,(place (+ p 1))]))))
+
+#; {[Listof String] [Listof Player] Player -> String}
+#; {ASSUME (= (length names) (length players))}
+(define (match-name names players f)
+  (if (is-a? f human%)
+      "the Human"
+      (for/first ([p players][n names] #:when (equal? f p)) n)))
+      
+#; {N -> String}
+(define (place p)
+  (case p
+    [(1) "first"]
+    [(2) "second"]
+    [(3) "third"]
+    [(4) "last"]
+    [else (~a p "th")]))
+ 
+#; {String -> Hash}
+(define (parse-args n)
+  (define h (to-hash (string-join n " ")))
+  (define player# (check-player# (dict-ref h 'players 2)))
+  (define rows    (check-rows    (dict-ref h 'rows    6)))
+  (define cols    (check-cols    (dict-ref h 'columns 6)))
+  (define fish    (check-fish    (dict-ref h 'fish    2)))
+  (define depth   (check-depth   (dict-ref h 'depth   2)))
+  (values player# rows cols fish depth))
+
+#; {N N FormatString -> X -> N}
+(define ((check-xyz low high err) w)
+  (unless (and (natural? w) (<= low w high)) ;; hardwired for now 
+    (error 'xobserve err w))
+  w)
+(define check-player# (check-xyz 2 4 "number of players expected, given ~e"))
+(define check-rows    (check-xyz 2 9 "number of rows expected, given ~e"))
+(define check-cols    (check-xyz 2 9 "number of columns expected, given ~e"))
+(define check-fish    (check-xyz 1 5 "number of fish per tile expected, given ~e"))
+(define check-depth   (check-xyz 1 3 "exploration depth expected, given ~e"))
+
+#; {String -> Hash}
+(define (to-hash x)
+  (define not-in ".")
+  (let* ([x (regexp-replace* #px"\\ *=\\ *" x not-in)]
+         [x (~a "(" x ")")]
+         [x (regexp-replace* #px"\\ +" x ")(")]
+         [x (regexp-replace* (pregexp (~a "\\" not-in)) x " . ")])
+    (define l (with-input-from-string x port->list))
+    (make-hasheq (if (equal? '(()) l) '[] l))))

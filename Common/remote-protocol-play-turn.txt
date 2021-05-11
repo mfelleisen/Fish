@@ -1,0 +1,39 @@
+
+referee                         player (p_1) . . . player (p_n)
+  |                                |                 |
+  |     tt(state,actions[])        |                 | % player receives:
+  | ----------------------- ~~~~ > |                 | % - current state 
+  |     action                     |                 | % - actions since last call
+  | <====================== ~~~~   |                 | % returns a move
+  .                                .                 .
+  .                                .                 . % one turn per player
+  .                                .                 . % skip if it cannot 
+  .                                .                 . % move in `this` state
+  .                                .                 .
+  |     tt(state,action[])          |                 |
+  | ----------------------- ~~~~ ------------------> |
+  |     action                     |                 |
+  | <====================== ~~~~ =================== | 
+  |                                |                 |
+  .                                .                 .
+  .                                .                 . % repeat until 
+  .                                .                 . % no penguin is 
+  .                                .                 . % able to move 
+  .                                .                 .
+  |                                |                 | 
+  |     tt(state,actions[])        |                 |
+  | ----------------------- ~~~~ > |                 | 
+  |     action                     |                 |
+  | <====================== ~~~~   |                 |
+  .                                .                 .
+  .                                .                 . 
+  .                                .                 .
+  .                                .                 .
+  |     tt(state,action[])         |                 |
+  | ----------------------- ~~~~ ------------------> |
+  |     action                     |                 |
+  | <====================== ~~~~ =================== | 
+  |                                |                 |
+  .                                .                 .
+  .                                .                 .
+

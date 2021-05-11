@@ -1,0 +1,44 @@
+
+referee                         player (p_1) . . . player (p_n)
+  |                                |                 |
+  |     tt(state,actions[])        |                 | % player   receives: first calls &
+  | -----------------------------> |                 | % - current state 
+  |     action                     |                 | % - actions since last call to `this` player*
+  | <============================  |                 | % returns a move
+  .                                .                 .
+  .                                .                 . % one turn per player
+  .                                .                 . % skip if it cannot 
+  .                                .                 . % move in `this` state
+  .                                .                 .
+  |     tt(state,actions[])         |                 |
+  | -----------------------------------------------> |
+  |     action                     |                 |
+  | <=============================================== | 
+  |                                |                 |
+  .                                .                 .
+  .                                .                 . % repeat until 
+  .                                .                 . % no penguin is 
+  .                                .                 . % able to move 
+  .                                .                 .
+  |                                |                 | 
+  |     tt(state,actions[])        |                 |
+  | -----------------------------> |                 | 
+  |     action                     |                 |
+  | <============================  |                 |
+  .                                .                 .
+  .                                .                 . 
+  .                                .                 .
+  .                                .                 .
+  |     tt(state,actions[])         |                 |
+  | -----------------------------------------------> |
+  |     action                     |                 |
+  | <=============================================== | 
+  |                                |                 |
+  .                                .                 .
+  .                                .                 .
+
+
+* oldest action unknown to player first, youngest last
+
+& the very first call (and only this call) to take-turn during any
+  game will be limited to 3s

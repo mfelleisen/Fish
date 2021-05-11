@@ -1,0 +1,15 @@
+ ----- 
+manager                        player (p_1) . . . player (p_n)
+  |                                |                 |
+  |                                |                 |
+  |     end(Boolean)               |                 |
+  | ----------------- ~~~~ ------> |                 | % true means "winner"
+  |                                |                 | % false means "loser"
+  .                                .                 . 
+  .                                .                 . 
+  .                                .                 .
+  .                                .                 .
+  |     end(Boolean)               |                 |
+  | ----------------- ~~~~ ------------------------> |
+  |                                |                 |
+  |                                |                 |

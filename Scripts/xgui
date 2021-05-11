@@ -1,0 +1,57 @@
+#! /bin/sh
+#| -*- racket -*-
+exec racket -tm "$0" -- ${1+"$@"}
+|#
+#lang racket
+
+;; (main n:natural) runs a game with n AI players and one human controled player, plus one observer 
+
+(provide main)
+
+;; ---------------------------------------------------------------------------------------------------
+(require Fish/Admin/referee)
+(require Fish/Admin/game-observer)
+(require Fish/Common/game-state)
+(require Fish/Player/player)
+(require Fish/Player/human)
+
+;; ---------------------------------------------------------------------------------------------------
+(module+ main
+  (apply main (vector->list (current-command-line-arguments))))
+
+(define (main n)
+  (define player# (string->number n))
+  (unless (and player# (natural? player#) (<= 1 player# 3)) ;; hardwired for now 
+    (error 'xgui "number of players expected, given ~e" n))
+  (define rows    5)
+  (define columns 5)
+  (define depth   2)
+  (define names   (take '("Benjamin" "Aria" "Emma") player#))
+  (define players (map (λ (n) (new player%)) names))
+  (define state0  (create-state rows columns (cons (new human%) players)))
+  (displayln `[players are ,@names plus one human])
+  (match-define (list rankings failures)
+    (parameterize ([explore-to-depth depth] [current-custodian (make-custodian)])
+      (begin0
+        (referee state0 #:time-out 20 #:observers (list observer))
+        (custodian-shutdown-all (current-custodian)))))
+  (for ([f failures]) (displayln `[,(match-name names players f) failed or cheated]))
+  (for ([r rankings] [p (in-naturals)])
+    (for ([a-player r])
+      (displayln `[,(match-name names players a-player) placed ,(place (+ p 1))]))))
+
+#; {[Listof String] [Listof Player] Player -> String}
+#; {ASSUME (= (length names) (length players))}
+(define (match-name names players f)
+  (if (is-a? f human%)
+      "the Human"
+      (for/first ([p players][n names] #:when (equal? f p)) n)))
+      
+#; {N -> String}
+(define (place p)
+  (case p
+    [(1) "first"]
+    [(2) "second"]
+    [(3) "third"]
+    [(4) "last"]
+    [else (~a p "th")]))
