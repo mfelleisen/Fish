@@ -590,13 +590,11 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module+ picts ;; duplicates players so I don't have to import `test` to watch a game
   
-  (parameterize ([explore-to-depth 1] [sleep-time .1])
-    (referee (create-state 3 3 one-good-one-bad) #:observers (list observer))
-    (void))
+  (void
+   (referee (create-state 3 3 one-good-one-bad) #:observers (list observer)))
   
-  (parameterize ([explore-to-depth 2] [sleep-time .2])
-    (referee (create-state 5 5 all-imperative #:holes '[[0 0] [3 3]]) #:observers (list observer))
-    (void)))
+  (void
+   (referee (create-state 5 5 all-imperative #:holes '[[0 0] [3 3]]) #:observers (list observer))))
 
 ;                                                  
 ;                                                  
@@ -634,14 +632,14 @@
 
   '**imperative**
   (collect-garbage) (collect-garbage) (collect-garbage)
-  (parameterize ([explore-to-depth EXP] [time-out-limit TPC])
+  (parameterize ([time-out-limit TPC])
     (time (referee (create-state ROW COL all-imperative #:holes '[[3 3]]))))
   ; 10 x 10 means one time out
   ;; cpu time: 4368 real time: 4448 gc time: 1065
 
   '**functional**
   (collect-garbage) (collect-garbage) (collect-garbage)
-  (parameterize ([explore-to-depth EXP] [time-out-limit TPC])
+  (parameterize ([time-out-limit TPC])
     (time (referee (create-state ROW COL players-1-2-3 #:holes '[[3 3]]))))
   ; 10 x 10 means one time out
   ;; cpu time: 7400 real time: 7543 gc time: 1406

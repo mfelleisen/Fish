@@ -32,9 +32,7 @@
   
  (contract-out
   (good-depth contract?)
-
-  (explore-to-depth (parameter/c good-depth))
-
+  
   [player%                  player%/c] ;; a functioning player that uses the fixed strategy
   (imperative-player%       player%/c)
 
@@ -62,7 +60,7 @@
 ;                 ;                                                                    
 ;                 ;                                                                    
 
-(require Fish/Player/strategy)
+(require Fish/Player/greedy)
 (require (except-in Fish/Common/game-tree))
 (require Fish/Common/game-state)
 (require Fish/Common/internal-player)
@@ -70,12 +68,12 @@
 
 (module+ test
   (require (submod ".."))
-  (require (submod Fish/Player/strategy examples))
+  (require (submod Fish/Player/greedy examples))
   (require rackunit))
 
 (module+ test-time
   (require (submod ".."))
-  (require (submod Fish/Player/strategy examples))
+  (require (submod Fish/Player/greedy examples))
   (require Fish/Common/internal-player)
   (require Fish/Lib/xsend)
   (require rackunit))
@@ -95,13 +93,11 @@
 ;                              
 ;
 
-(define explore-to-depth (make-parameter 2))
-
 ;; internals of Player
 ;; internally, the player is game mechanics while the strategy component makes game decisions 
 
 (define base-player%
-  (class object% (init-field [depth (explore-to-depth)])
+  (class object% (init-field)
     (field (me  (first penguin-colors)))
     (field (other-players '()))
     (field (tree #false))
@@ -128,13 +124,12 @@
 
 (define player%
   (class base-player%
-    (inherit-field me other-players tree depth)
+    (inherit-field me other-players tree)
     
     [define/override (take-turn state actions-since-last-turn)
       (set! tree (generate-tree state))
       ;; I could update the tree here but I'll just stay functional
-      (parameterize ([explore-to-depth depth])
-        (best-score-after (explore-to-depth) tree))]
+      (move-penguin tree)]
     
     (super-new)))
 
@@ -147,7 +142,7 @@
             (if (empty? actions-of-others-since-last-turn)
                 (generate-tree state)
                 (apply tree-path tree actions-of-others-since-last-turn)))
-      (define best-action (best-score-after (explore-to-depth) tree))
+      (define best-action (move-penguin tree))
       (set! tree (tree-path tree best-action))
       best-action]
     
