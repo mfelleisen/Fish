@@ -226,8 +226,7 @@
 
   (define PLRS '["a" "b" "c" "d" "e1" "failed attempt at Name" "e"])
   (define PORT 45678)
-  (parameterize ([current-custodian (make-custodian)]
-		 [explore-to-depth 2])
+  (parameterize ([current-custodian (make-custodian)])
     (define players  (build-list (length PLRS) (λ _ (new player%))))
     (define named    (map list PLRS players))
     (define o*       (open-output-string))

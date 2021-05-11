@@ -146,7 +146,7 @@
   (define iplayers-1-2-3 (list iplayer1 player2 player3))
   (define all-imperative (list iplayer1 iplayer2 iplayer3))
 
-  (define (many-players n) (for/list ([_ (in-range n)]) (new player% [depth 2])))
+  (define (many-players n) (for/list ([_ (in-range n)]) (new player%)))
 
   (define bad-start-of-tournament (new bad-start-of-tournament%))
   (define bad-playing-as   (new bad-playing-as%))
@@ -624,11 +624,10 @@
     (define x (let ([x (getenv (~a 'x))]) (or (and x (string->number x)) d))))
 
   (dfenv TPC 20)
-  (dfenv EXP 2)
   (dfenv ROW 5)
   (dfenv COL 5)
 
-  (displayln `[timing ,ROW x ,COL board with exploration depth ,EXP for ,TPC s/call])  
+  (displayln `[timing ,ROW x ,COL board with for ,TPC s/call])  
 
   '**imperative**
   (collect-garbage) (collect-garbage) (collect-garbage)

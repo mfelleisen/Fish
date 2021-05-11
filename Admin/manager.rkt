@@ -232,13 +232,13 @@
   
   (define bads (list bad-playing-as bad-playing-with bad-turn-choice bad-end-of-tournament))
   (define 6+bads (append (many-players 6) bads))
-  (define 6+bads-counted `[[2 ,(length bads)] [2 ,(- (length bads) 1)]])
+  (define 6+bads-counted `[[1 ,(length bads)] [2 ,(- (length bads) 1)]])
 
   (define all-bad (cons bad-start-of-tournament bads))
   (define 2+bads (append #; 2players all-bad))
   (define 2+bads-counted `[[0 ,(length all-bad)] [0 ,(- (length all-bad) 1)]])
   (define 10mixed (append (many-players (- 10 (length all-bad))) all-bad))
-  (define 10mixed-counted `[[2 ,(length all-bad)] [2 ,(- (length all-bad) 1)]])
+  (define 10mixed-counted `[[1 ,(length all-bad)] [2 ,(- (length all-bad) 1)]])
 
   (define six (append players-1-2-3 (list bad-playing-as bad-playing-with bad-turn-choice)))
   (define six-expected players-1-2-3))
