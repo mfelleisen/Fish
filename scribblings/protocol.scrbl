@@ -15,9 +15,7 @@
    (build-path (getenv "HOME") "Hub" "Fish" "Common" file))
 
 @; -----------------------------------------------------------------------------
-@title[#:tag "local protocol"]{@red{Logical Interactions}}
-
-@author{Matthias Felleisen}
+@title[#:tag "local protocol"]{@purple{Logical Interactions}}
 
 The interaction between Racket player components and the Racket admin framework
 is governed by the set of following interaction diagrams.

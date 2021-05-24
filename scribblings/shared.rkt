@@ -169,7 +169,7 @@ code
 
 (provide make-list first) ;; Racket functions 
 
-(provide red link-color blue green yellow orange pink purple background-white)
+(provide red link-color blue green yellow orange pink white black purple background-white)
 
 ;; ---------------------------------------------------------------------------------------------------
 (require scribble/manual scribble/core scribble/html-properties 2htdp/image)
@@ -262,7 +262,9 @@ code
 (define-colored yellow)
 (define-colored orange)
 (define-colored pink)
+(define-colored black)
 (define-colored purple)
+(define-colored white)
 (define-colored blue)
 
 (define (background-white c . t)
