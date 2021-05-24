@@ -1,5 +1,26 @@
 ## The Fish Competition 
 
+### Install
+
+If you wish to inspect the code easily and experiment with it, clone the repo and then install it: 
+
+```
+$ git clone git@github.com:mfelleisen/Fish.git
+$ cd Fish 
+$ raco pkg install 
+$ raco doc Fish 
+```
+
+This last command will search for the docs of the newly installed "Fish Project"
+collection. The results are displayed in a new tab of your default browser. Follow the link
+to the project and peruse the documentation, including a version of this README file. 
+
+The package depends on several other repos, including Cameron Moy's `trace` contracts. The
+`pkg install` will download and install those.
+
+
+### The Idea 
+
 ["Hey, that's my fish"](https://boardgamegeek.com/boardgame/8203/hey-s-my-fish) (Bambus Spielverlag)
 is a board game for players eight and older. It has won several awards and nominations, including the
 _Lucca Games Best Family Game_ nominee.
@@ -96,21 +117,9 @@ repo reflects this origin. It consists of
 **Note** An independent development of a client for an existing server would produce a
 different organization. 
 
-### Install
-
-If you wish to inspect the code easily and experiment with it, clone the repo and then install it: 
-
-```
-$ git clone git@github.com:mfelleisen/Fish.git
-$ cd Fish 
-$ raco pkg install 
-```
-
-The package depends on several other repos, including Cameron Moy's `trace` contracts. The
-`pkg install` will download and install those.
-
-
 ### TODO
+
+- complete docs 
 
 - hide 'suspension' more in Tree 
 
