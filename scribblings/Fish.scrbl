@@ -43,9 +43,9 @@ delivering robust code.
 The @emph{Fish} board is an arrangement of hexagon-shaped tiles, which display some number of fish.
 During the start-up phase, players place their penguins on these tiles; a tile cannot hold more than
 one penguin. Once the players have placed their penguins, they move their penguins in straight,
-uninterrupted lines across the board. The lines are defined by six directions that each tile
+uninterrupted lines across the board. The lines are defined by the six directions that each tile
 represents. When a penguin leaves a tile, the fish on the tile become the player's property and the
-tile is removed from the board. Given this context, an _uninterrupted_ line is one that contains no
+tile is removed from the board. Given this context, an @emph{uninterrupted} line is one that contains no
 holes and no tiles occupied by a penguin. The player with the most fish wins the game; the game
 permits n-fold ties.
 

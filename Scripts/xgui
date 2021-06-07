@@ -19,19 +19,30 @@ exec racket -tm "$0" -- ${1+"$@"}
 (module+ main
   (apply main (vector->list (current-command-line-arguments))))
 
-(define (main n)
-  (define player# (string->number n))
-  (unless (and player# (natural? player#) (<= 1 player# 3)) ;; hardwired for now 
-    (error 'xgui "number of players expected, given ~e" n))
+(define (main . n)
+  (define (err)
+    (printf "usage: ./xgui n \n")
+    (printf " where n is 1, 2, or 3\n")
+    (exit 0))
+  (cond
+    [(and (= (length n) 1) (first n))
+     =>
+     (lambda (n-str)
+       (define n (string->number n-str))
+       (unless (and n (natural? n) (<= 1 n 3)) (err))
+       (aux n))]
+    [else (err)]))
+
+#; { (U 1 2 3) -> Void}
+(define (aux player#)
   (define rows    5)
   (define columns 5)
-  (define depth   2)
   (define names   (take '("Benjamin" "Aria" "Emma") player#))
   (define players (map (λ (n) (new player%)) names))
   (define state0  (create-state rows columns (cons (new human%) players)))
   (displayln `[players are ,@names plus one human])
   (match-define (list rankings failures)
-    (parameterize ([explore-to-depth depth] [current-custodian (make-custodian)])
+    (parameterize ([current-custodian (make-custodian)])
       (begin0
         (referee state0 #:time-out 20 #:observers (list observer))
         (custodian-shutdown-all (current-custodian)))))
