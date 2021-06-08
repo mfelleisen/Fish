@@ -17,6 +17,5 @@ echo "grepping"
 if grep --quiet "non-zero exit" errors.txt; then 
    cat errors.txt 
 else 
-   tail -1 errors.txt
    grep location errors.txt
 fi
