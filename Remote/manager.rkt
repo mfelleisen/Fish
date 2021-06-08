@@ -53,6 +53,7 @@
 (module+ test
   (require (submod ".."))
   (require Fish/Player/player)
+  (require Fish/Player/greedy)
   (require (submod Fish/Common/game-state examples))
   (require Fish/Common/game-state)
   (require rackunit))
@@ -131,7 +132,7 @@
 ;                                     
 
 (module+ test
-  (define p1 (new player%))
+  (define p1 (new player% [strategy greedy-strategy]))
   (define b1 (box (gensym)))
 
   (check-equal? ((dispatcher b1 p1) eof) #false)

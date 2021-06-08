@@ -33,7 +33,7 @@
  (contract-out
   (good-depth contract?)
   
-  [player%                  player%/c] ;; a functioning player that uses the fixed strategy
+  [player%                  player%/c] ;; a functional player that uses the fixed strategy
   (imperative-player%       player%/c)
 
   [bad-start-of-tournament% player%/c] ;; raises exn 
@@ -60,7 +60,7 @@
 ;                 ;                                                                    
 ;                 ;                                                                    
 
-(require Fish/Player/greedy)
+(require Fish/Player/strategy-interface)
 (require (except-in Fish/Common/game-tree))
 (require Fish/Common/game-state)
 (require Fish/Common/internal-player)
@@ -68,6 +68,7 @@
 
 (module+ test
   (require (submod ".."))
+  (require Fish/Player/greedy)
   (require (submod Fish/Player/greedy examples))
   (require rackunit))
 
@@ -97,7 +98,7 @@
 ;; internally, the player is game mechanics while the strategy component makes game decisions 
 
 (define base-player%
-  (class object% (init-field)
+  (class object% (init-field strategy)
     (field (me  (first penguin-colors)))
     (field (other-players '()))
     (field (tree #false))
@@ -109,7 +110,7 @@
       (set! other-players others)]
     
     (define/public (initial state)
-      (place-penguin state))
+      ((strategy-place strategy) state))
     
     [define/public (take-turn state actions-since-last-turn)
       (error 'take-turn "abstract")]
@@ -124,32 +125,32 @@
 
 (define player%
   (class base-player%
-    (inherit-field me other-players tree)
+    (inherit-field strategy me other-players tree)
     
     [define/override (take-turn state actions-since-last-turn)
       (set! tree (generate-tree state))
       ;; I could update the tree here but I'll just stay functional
-      (move-penguin tree)]
+      ((strategy-move strategy) tree)]
     
     (super-new)))
 
 (define imperative-player%
   (class base-player%
-    (inherit-field me other-players tree)
+    (inherit-field strategy me other-players tree)
     
     [define/override (take-turn state actions-of-others-since-last-turn)
       (set! tree 
             (if (empty? actions-of-others-since-last-turn)
                 (generate-tree state)
                 (apply tree-path tree actions-of-others-since-last-turn)))
-      (define best-action (move-penguin tree))
+      (define best-action ((strategy-move strategy) tree))
       (set! tree (tree-path tree best-action))
       best-action]
     
     (super-new)))
 
 (module+ test
-  (define player (new player%))
+  (define player (new player% [strategy greedy-strategy]))
 
   (check-equal? (send player playing-as (second penguin-colors)) (void))
   (check-equal? (send player playing-with (list (third penguin-colors))) (void))
@@ -165,7 +166,7 @@
   (check-equal? (send player end-of-tournament #t) (void)))
 
 (module+ test
-  (define player! (new imperative-player%))
+  (define player! (new imperative-player% [strategy greedy-strategy]))
 
   (check-equal? (send player! playing-as (second penguin-colors)) (void))
   (check-equal? (send player! playing-with (list (third penguin-colors))) (void))

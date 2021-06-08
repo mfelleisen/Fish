@@ -59,7 +59,8 @@
 (module+ test
   (require (submod ".."))
   (require Fish/Remote/client)
-  (require Fish/Player/player)  
+  (require Fish/Player/player)
+  (require Fish/Player/greedy)
   (require rackunit))
 
 ;                                            
@@ -227,7 +228,7 @@
   (define PLRS '["a" "b" "c" "d" "e1" "failed attempt at Name" "e"])
   (define PORT 45678)
   (parameterize ([current-custodian (make-custodian)])
-    (define players  (build-list (length PLRS) (λ _ (new player%))))
+    (define players  (build-list (length PLRS) (λ _ (new player% [strategy greedy-strategy]))))
     (define named    (map list PLRS players))
     (define o*       (open-output-string))
     (define customer (thread (λ () (parameterize ([current-output-port o*]) (client named)))))

@@ -39,6 +39,7 @@ The seeming maxium is 4, but if "you" choose correctly, it's 3.
 (require (only-in Fish/Common/board posn/c))
 
 (provide
+ greedy-strategy
 
  (contract-out
 
@@ -51,13 +52,7 @@ The seeming maxium is 4, but if "you" choose correctly, it's 3.
    ;; reteturn action, lexicograpphically closest to ORIGIN
    #; #false           ;; -- when the state is final
    #; turn?            ;; -- when a player can skip or move 
-   (-> tree? (or/c #false turn?)))
-  
-  [tie-breaker
-   ;; implemen a tie breaker if there are serveal equally valued player actions:
-   ;; in order, apply the following "filters" to reduce the list:
-   ;; top-most row of `from` field, `left-most` column of `from`, top-most for `to`, left-most for to
-   (-> (and/c (listof move/c) cons?) move/c)]))
+   (-> tree? (or/c #false turn?)))))
 
 (module+ examples
   (provide
@@ -83,6 +78,7 @@ The seeming maxium is 4, but if "you" choose correctly, it's 3.
 ;                   ;                                                                              
 ;                                                                                                  
 
+(require Fish/Player/strategy-interface)
 (require (except-in Fish/Common/game-tree tree?))
 (require (except-in Fish/Common/game-state fishes? turn? move/c))
 (require (except-in Fish/Common/board posn/c))
@@ -169,6 +165,10 @@ The seeming maxium is 4, but if "you" choose correctly, it's 3.
   (filter-map (λ (x) (and (= (second x) the-max) (first x))) fish-steps))
 
 ;; ---------------------------------------------------------------------------------------------------
+#; (-> (and/c (listof move/c) cons?) move/c)
+;; implemen a tie breaker if there are serveal equally valued player actions:
+;; in order, apply the following "filters" to reduce the list:
+;; top-most row of `from` field, `left-most` column of `from`, top-most for `to`, left-most for to
 (define (tie-breaker lop)
   (define-syntax whittle-down-to-1
     (syntax-rules ()
@@ -204,6 +204,10 @@ The seeming maxium is 4, but if "you" choose correctly, it's 3.
   (check-equal? (tie-breaker '{ [[0 1] [2 0]] [[0 1] [3 0]] }) '[ [0 1] [2 0] ] "BUG")
 
   (check-exn #px"catastrophe" (λ () (tie-breaker `{ [[0 1] [0 3]] [[0 1] [0 3]] }))))
+
+;; ---------------------------------------------------------------------------------------------------
+
+(define greedy-strategy (strategy place-penguin move-penguin))
 
 ;                                                                                  
 ;                                                                                  

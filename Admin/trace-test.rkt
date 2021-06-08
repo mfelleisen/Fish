@@ -11,16 +11,17 @@
   (require rackunit))
 
 (require Fish/Common/player-interface-error-reporting)
+(require Fish/Player/greedy)
 (error-printing? #true)
 
 ;; -----------------------------------------------------------------------------
-(define player1 (new imperative-player%))
-(define player0 (new player%))
-(define player2 (new player%))
-(define player3 (new player%))
-(define player4 (new player%))
+(define player1 (new imperative-player% [strategy greedy-strategy]))
+(define player0 (new player% [strategy greedy-strategy]))
+(define player2 (new player% [strategy greedy-strategy]))
+(define player3 (new player% [strategy greedy-strategy]))
+(define player4 (new player% [strategy greedy-strategy]))
 
-(define bad-turn-choice  (new bad-turn-choice%))
+(define bad-turn-choice  (new bad-turn-choice% [strategy greedy-strategy]))
 
 (define players-1-2-3 (list player0 player2 player3))
 
