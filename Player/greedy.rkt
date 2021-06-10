@@ -90,7 +90,7 @@
   (define spot* (state-board-traverse s board-lr-td (λ (x y) (list y x))))
   (when (empty? spot*)
     (error 'place-penguin "not enough spots for placing penguins"))
-  (first (argmax second spot*)))
+  (choose first spot*))
 
 (define (move-penguin tree)
   (define mapping (node-mapping tree))
@@ -98,13 +98,17 @@
     [(empty? mapping) #false]
     [(noop? tree)    (caar mapping)]
     [else
-     (define fish-steps
+     (define steps+value
        (for/list ([1map mapping])
          (match-define (list step next) 1map)
          (list step (fish-at (fishes-board (node-current [next])) (second step)))))
-     (define the-max (max-map second fish-steps))
-     (define all-max (filter-map (λ (x) (and (= (second x) the-max) (first x))) fish-steps))
-     (tie-breaker all-max)]))
+     (choose tie-breaker steps+value)]))
+
+#; {([Listof X] -> X) [Listof [List X Real]] -> X}
+(define (choose tie-breaker xvalue)
+  (define the-max (max-map second xvalue))
+  (define all-max (filter-map (λ (x) (and (= (second x) the-max) (first x))) xvalue))
+  (tie-breaker all-max))
 
 (define (max-map f lox) (apply max (map f lox)))
 

@@ -82,18 +82,18 @@
     [(empty? mapping) #false]
     [(noop? tree)     (caar mapping)]
     [else
-     (define fish-steps
+     (define steps+value
        (for/list ([1map mapping])
          (match-define (list step next) 1map)
          (list step (fish-at (fishes-board (node-current [next])) (second step)))))     
-     (choose tie-breaker fish-steps)]))
+     (choose tie-breaker steps+value)]))
 
 ;; ---------------------------------------------------------------------------------------------------
 #; {([Listof X] -> X) [Listof [List X Real]] -> X}
-(define (choose tie-breaker fish-steps)
-  (define the-max (max-map second fish-steps))
-  (define others (select the-max < fish-steps))
-  (if (empty? others) (tie-breaker (select the-max = fish-steps)) (random-choice others)))
+(define (choose tie-breaker x+value)
+  (define the-max (max-map second x+value))
+  (define others (select the-max < x+value))
+  (if (empty? others) (tie-breaker (select the-max = x+value)) (random-choice others)))
 
 #; {Real (Real Real -> Boolean) [Listof [List X Real]] -> [Listof X]}
 (define (select the-max = fish-steps)
