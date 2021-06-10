@@ -52,92 +52,76 @@
   (require (submod Fish/Player/greedy examples))
   (require rackunit))
 
-;                                                                                  
-;                                                                                  
-;            ;;;                                                                   
-;              ;                                                      ;            
-;              ;                                                      ;            
-;   ; ;;;      ;      ;;;     ;;;    ;;;;   ;;;;;;   ;;;;   ; ;;;   ;;;;;;   ;;;;  
-;   ;;  ;;     ;     ;   ;   ;   ;  ;    ;  ;  ;  ; ;    ;  ;;   ;    ;     ;    ; 
-;   ;    ;     ;         ;  ;       ;;;;;;  ;  ;  ; ;;;;;;  ;    ;    ;     ;      
-;   ;    ;     ;     ;;;;;  ;       ;       ;  ;  ; ;       ;    ;    ;      ;;;;  
-;   ;    ;     ;    ;    ;  ;       ;       ;  ;  ; ;       ;    ;    ;          ; 
-;   ;;  ;;     ;    ;   ;;   ;   ;  ;;   ;  ;  ;  ; ;;   ;  ;    ;    ;     ;    ; 
-;   ; ;;;       ;;;  ;;; ;    ;;;    ;;;;;  ;  ;  ;  ;;;;;  ;    ;     ;;;   ;;;;  
-;   ;                                                                              
-;   ;                                                                              
-;   ;                                                                              
-;                                                                                  
+;                                                                                                  
+;                                                                                                  
+;            ;;;                                                                                   
+;              ;                                      ;;;                                          
+;              ;                                     ;                                             
+;   ; ;;;      ;      ;;;     ;;;    ;;;;            ;              ;;;;;;   ;;;;   ;    ;   ;;;;  
+;   ;;  ;;     ;     ;   ;   ;   ;  ;    ;           ;;             ;  ;  ; ;;  ;;  ;;  ;;  ;    ; 
+;   ;    ;     ;         ;  ;       ;;;;;;          ;  ;  ;         ;  ;  ; ;    ;   ;  ;   ;;;;;; 
+;   ;    ;     ;     ;;;;;  ;       ;               ;  ;; ;         ;  ;  ; ;    ;   ;  ;   ;      
+;   ;    ;     ;    ;    ;  ;       ;               ;   ; ;         ;  ;  ; ;    ;   ;;;;   ;      
+;   ;;  ;;     ;    ;   ;;   ;   ;  ;;   ;          ;;   ;          ;  ;  ; ;;  ;;    ;;    ;;   ; 
+;   ; ;;;       ;;;  ;;; ;    ;;;    ;;;;;           ;;;; ;         ;  ;  ;  ;;;;     ;;     ;;;;; 
+;   ;                                                                                              
+;   ;                                                                                              
+;   ;                                                                                              
+;                                                                                                  
 
 ;; use left-to-right, top-down traversal to find the first highest-value spot
 (define (place-penguin s)
-  (define spot* (state-board-traverse s board-lr-td cons))
-  (cond
-    [(empty? spot*) (error 'place-penguin "not enough spots for placing penguins")]
-    [else
-     (define max (argmax car spot*))
-     (define others (filter-map (λ (x) (and (not (= (car max) (car x))) (cdr x))) spot*))
-     (if (empty? others) (cdr max) (random-choice others))]))
-  
-(module+ test 
-  (check-equal? (place-penguin (create-state 2 2 '(a b) #:fixed 2 #:holes '[[0 0]])) '[0 0] "place 1")
-  
-  (define short-row
-    (let* ([s (create-state 2 2 '(a b) #:holes '[[0 1] [1 1]])]
-           [s (place-avatar s '[0 0])])
-      s))
-  (check-equal? (place-penguin short-row) '[1 0] "place 2")
-
-  (define no-spots (place-avatar short-row '[1 0]))
-  (check-exn #px"not enough" (λ () (place-penguin no-spots)) "bug 3, gen rec out of spots"))
-    
-;                                                                          
-;                                                                          
-;                   ;                                                      
-;     ;             ;                         ;                            
-;     ;             ;                         ;                            
-;   ;;;;;;    ;;;   ;   ;    ;;;;           ;;;;;;  ;    ;   ;;;;   ; ;;;  
-;     ;      ;   ;  ;  ;    ;    ;            ;     ;    ;   ;;  ;  ;;   ; 
-;     ;          ;  ;;;     ;;;;;;            ;     ;    ;   ;      ;    ; 
-;     ;      ;;;;;  ;;;     ;                 ;     ;    ;   ;      ;    ; 
-;     ;     ;    ;  ;  ;    ;                 ;     ;    ;   ;      ;    ; 
-;     ;     ;   ;;  ;   ;   ;;   ;            ;     ;   ;;   ;      ;    ; 
-;      ;;;   ;;; ;  ;    ;   ;;;;;             ;;;   ;;; ;   ;      ;    ; 
-;                                                                          
-;                                                                          
-;                                                                          
-;                                                                          
-
+  (define spot* (state-board-traverse s board-lr-td (λ (x y) (list y x))))
+  (when (empty? spot*)
+    (error 'place-penguin "not enough spots for placing penguins"))
+  (choose random-choice spot*))
+                
 (define (move-penguin tree)
-  (define state   (node-current tree))
-  (define players (fishes-players state))
-  (define cplayer (fishes-current-player state))
   (define mapping (node-mapping tree))
   (cond 
     [(empty? mapping) #false]
-    [(noop? tree)    (caar mapping)]
-    [else (maximal-fish-step cplayer mapping)]))
-
-(define (maximal-fish-step cplayer mapping)
-  (all-max
-   (for/list ([1map mapping])
-     (define next [(second 1map)])
-     (define step (first 1map))
-     (list step (fish-at (fishes-board (node-current next)) (second step))))))
-
-(define (all-max fish-steps)
-  (define the-max (second (argmax second fish-steps)))
-  (define others (filter-map (λ (x) (and (< (second x) the-max) (first x))) fish-steps))
-  (if (empty? others)
-      (tie-breaker (filter-map (λ (x) (and (= (second x) the-max) (first x))) fish-steps))
-      (random-choice others)))
+    [(noop? tree)     (caar mapping)]
+    [else
+     (define fish-steps
+       (for/list ([1map mapping])
+         (match-define (list step next) 1map)
+         (list step (fish-at (fishes-board (node-current [next])) (second step)))))     
+     (choose tie-breaker fish-steps)]))
 
 ;; ---------------------------------------------------------------------------------------------------
+#; {([Listof X] -> X) [Listof [List X Real]] -> X}
+(define (choose tie-breaker fish-steps)
+  (define the-max (max-map second fish-steps))
+  (define others (select the-max < fish-steps))
+  (if (empty? others) (tie-breaker (select the-max = fish-steps)) (random-choice others)))
+
+#; {Real (Real Real -> Boolean) [Listof [List X Real]] -> [Listof X]}
+(define (select the-max = fish-steps)
+  (filter-map (λ (x) (and (= (second x) the-max) (first x))) fish-steps))
+  
 #; {[NEListof X] -> X}
 (define (random-choice lst)
   (list-ref lst (random (length lst))))
 
-;; ---------------------------------------------------------------------------------------------------
+(define (max-map f lox) (apply max (map f lox)))
+
+;                                                                                          
+;                                                                                          
+;              ;                    ;                               ;                      
+;     ;                             ;                               ;                      
+;     ;                             ;                               ;                      
+;   ;;;;;;   ;;;     ;;;;           ; ;;;    ;;;;    ;;;;     ;;;   ;   ;    ;;;;    ;;;;  
+;     ;        ;    ;    ;          ;;  ;;   ;;  ;  ;    ;   ;   ;  ;  ;    ;    ;   ;;  ; 
+;     ;        ;    ;;;;;;          ;    ;   ;      ;;;;;;       ;  ;;;     ;;;;;;   ;     
+;     ;        ;    ;               ;    ;   ;      ;        ;;;;;  ;;;     ;        ;     
+;     ;        ;    ;               ;    ;   ;      ;       ;    ;  ;  ;    ;        ;     
+;     ;        ;    ;;   ;          ;;  ;;   ;      ;;   ;  ;   ;;  ;   ;   ;;   ;   ;     
+;      ;;;   ;;;;;   ;;;;;          ; ;;;    ;       ;;;;;   ;;; ;  ;    ;   ;;;;;   ;     
+;                                                                                          
+;                                                                                          
+;                                                                                          
+;                                                                                          
+
 #; (-> (and/c (listof move/c) cons?) move/c)
 ;; implemen a tie breaker if there are serveal equally valued player actions:
 ;; in order, apply the following "filters" to reduce the list:
@@ -201,8 +185,14 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (module+ test
-  (check-equal? (place-penguin 2-state-no-action-2) '[0 0] "origin")
-  (check-equal? (place-penguin 2-state-1-action-7) '[0 1] "one over")
+  (define short-row
+    (let* ([s (create-state 2 2 '(a b) #:holes '[[0 1] [1 1]])]
+           [s (place-avatar s '[0 0])])
+      s))
+  (define no-spots (place-avatar short-row '[1 0]))
+  (check-exn #px"not enough" (λ () (place-penguin no-spots)) "bug 3, gen rec out of spots")
+  (check-true   (posn/c (place-penguin 2-state-no-action-2)) "origin")
+  (check-true   (posn/c (place-penguin 2-state-1-action-7)) "one over")
   (check-equal? (place-penguin special) '[1 0] "one down")
   (check-equal? (place-penguin 2-state-0-action-1player2) '[1 1])
   (check-equal? (place-penguin ran-placement-state) '[1 1] "only one non-maximal tile left"))
@@ -213,5 +203,5 @@
   (check-true   (skip? (move-penguin tree-2-state-0-action-1player2)) "cant")
   (check-equal? (move-penguin tree-2-state-1action-first-player) A2-state-1action-first-player)
   (check-equal? (move-penguin tree-3-state-2) A3-state-2)
-  (check-equal? (move-penguin ran-move-tree) '[[0 1] [1 1]] "go below greedy step"))
+  (check-equal? (move-penguin tree-ran-move) '[[0 1] [1 1]] "go below greedy step"))
 

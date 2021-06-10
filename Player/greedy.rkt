@@ -36,7 +36,7 @@
    A2-state-no-action-2 A2-state-1-action-7 A2-state-2 A3-state-2
    B2-state-no-action-2
    ran-placement-state
-   ran-move-tree))
+   tree-ran-move))
 
 ;                                                                                                  
 ;                                                                                                  
@@ -68,81 +68,64 @@
   (require (submod ".." examples))
   (require rackunit))
 
-;                                                                                  
-;                                                                                  
-;            ;;;                                                                   
-;              ;                                                      ;            
-;              ;                                                      ;            
-;   ; ;;;      ;      ;;;     ;;;    ;;;;   ;;;;;;   ;;;;   ; ;;;   ;;;;;;   ;;;;  
-;   ;;  ;;     ;     ;   ;   ;   ;  ;    ;  ;  ;  ; ;    ;  ;;   ;    ;     ;    ; 
-;   ;    ;     ;         ;  ;       ;;;;;;  ;  ;  ; ;;;;;;  ;    ;    ;     ;      
-;   ;    ;     ;     ;;;;;  ;       ;       ;  ;  ; ;       ;    ;    ;      ;;;;  
-;   ;    ;     ;    ;    ;  ;       ;       ;  ;  ; ;       ;    ;    ;          ; 
-;   ;;  ;;     ;    ;   ;;   ;   ;  ;;   ;  ;  ;  ; ;;   ;  ;    ;    ;     ;    ; 
-;   ; ;;;       ;;;  ;;; ;    ;;;    ;;;;;  ;  ;  ;  ;;;;;  ;    ;     ;;;   ;;;;  
-;   ;                                                                              
-;   ;                                                                              
-;   ;                                                                              
-;                                                                                  
+;                                                                                                  
+;                                                                                                  
+;            ;;;                                                                                   
+;              ;                                      ;;;                                          
+;              ;                                     ;                                             
+;   ; ;;;      ;      ;;;     ;;;    ;;;;            ;              ;;;;;;   ;;;;   ;    ;   ;;;;  
+;   ;;  ;;     ;     ;   ;   ;   ;  ;    ;           ;;             ;  ;  ; ;;  ;;  ;;  ;;  ;    ; 
+;   ;    ;     ;         ;  ;       ;;;;;;          ;  ;  ;         ;  ;  ; ;    ;   ;  ;   ;;;;;; 
+;   ;    ;     ;     ;;;;;  ;       ;               ;  ;; ;         ;  ;  ; ;    ;   ;  ;   ;      
+;   ;    ;     ;    ;    ;  ;       ;               ;   ; ;         ;  ;  ; ;    ;   ;;;;   ;      
+;   ;;  ;;     ;    ;   ;;   ;   ;  ;;   ;          ;;   ;          ;  ;  ; ;;  ;;    ;;    ;;   ; 
+;   ; ;;;       ;;;  ;;; ;    ;;;    ;;;;;           ;;;; ;         ;  ;  ;  ;;;;     ;;     ;;;;; 
+;   ;                                                                                              
+;   ;                                                                                              
+;   ;                                                                                              
+;                                                                                                  
 
 ;; use left-to-right, top-down traversal to find the first highest-value spot
 (define (place-penguin s)
-  (define spot* (state-board-traverse s board-lr-td cons))
-  (cond
-    [(empty? spot*) (error 'place-penguin "not enough spots for placing penguins")]
-    [else (cdr (argmax car spot*))]))
-  
-(module+ test 
-  (check-equal? (place-penguin (create-state 2 2 '(a b) #:fixed 2 #:holes '[[0 0]])) '[0 0] "place 1")
-  
-  (define short-row
-    (let* ([s (create-state 2 2 '(a b) #:holes '[[0 1] [1 1]])]
-           [s (place-avatar s '[0 0])])
-      s))
-  (check-equal? (place-penguin short-row) '[1 0] "place 2")
-
-  (define no-spots (place-avatar short-row '[1 0]))
-  (check-exn #px"not enough" (λ () (place-penguin no-spots)) "bug 3, gen rec out of spots"))
-    
-;                                                                          
-;                                                                          
-;                   ;                                                      
-;     ;             ;                         ;                            
-;     ;             ;                         ;                            
-;   ;;;;;;    ;;;   ;   ;    ;;;;           ;;;;;;  ;    ;   ;;;;   ; ;;;  
-;     ;      ;   ;  ;  ;    ;    ;            ;     ;    ;   ;;  ;  ;;   ; 
-;     ;          ;  ;;;     ;;;;;;            ;     ;    ;   ;      ;    ; 
-;     ;      ;;;;;  ;;;     ;                 ;     ;    ;   ;      ;    ; 
-;     ;     ;    ;  ;  ;    ;                 ;     ;    ;   ;      ;    ; 
-;     ;     ;   ;;  ;   ;   ;;   ;            ;     ;   ;;   ;      ;    ; 
-;      ;;;   ;;; ;  ;    ;   ;;;;;             ;;;   ;;; ;   ;      ;    ; 
-;                                                                          
-;                                                                          
-;                                                                          
-;                                                                          
+  (define spot* (state-board-traverse s board-lr-td (λ (x y) (list y x))))
+  (when (empty? spot*)
+    (error 'place-penguin "not enough spots for placing penguins"))
+  (first (argmax second spot*)))
 
 (define (move-penguin tree)
-  (define state   (node-current tree))
-  (define players (fishes-players state))
-  (define cplayer (fishes-current-player state))
   (define mapping (node-mapping tree))
   (cond 
     [(empty? mapping) #false]
     [(noop? tree)    (caar mapping)]
-    [else (tie-breaker (maximal-fish-step cplayer mapping))]))
+    [else
+     (define fish-steps
+       (for/list ([1map mapping])
+         (match-define (list step next) 1map)
+         (list step (fish-at (fishes-board (node-current [next])) (second step)))))
+     (define the-max (max-map second fish-steps))
+     (define all-max (filter-map (λ (x) (and (= (second x) the-max) (first x))) fish-steps))
+     (tie-breaker all-max)]))
 
-(define (maximal-fish-step cplayer mapping)
-  (all-max
-   (for/list ([1map mapping])
-     (define next [(second 1map)])
-     (define step (first 1map))
-     (list step (fish-at (fishes-board (node-current next)) (second step))))))
+(define (max-map f lox) (apply max (map f lox)))
 
-(define (all-max fish-steps)
-  (define the-max (second (argmax second fish-steps)))
-  (filter-map (λ (x) (and (= (second x) the-max) (first x))) fish-steps))
 
-;; ---------------------------------------------------------------------------------------------------
+;                                                                                          
+;                                                                                          
+;              ;                    ;                               ;                      
+;     ;                             ;                               ;                      
+;     ;                             ;                               ;                      
+;   ;;;;;;   ;;;     ;;;;           ; ;;;    ;;;;    ;;;;     ;;;   ;   ;    ;;;;    ;;;;  
+;     ;        ;    ;    ;          ;;  ;;   ;;  ;  ;    ;   ;   ;  ;  ;    ;    ;   ;;  ; 
+;     ;        ;    ;;;;;;          ;    ;   ;      ;;;;;;       ;  ;;;     ;;;;;;   ;     
+;     ;        ;    ;               ;    ;   ;      ;        ;;;;;  ;;;     ;        ;     
+;     ;        ;    ;               ;    ;   ;      ;       ;    ;  ;  ;    ;        ;     
+;     ;        ;    ;;   ;          ;;  ;;   ;      ;;   ;  ;   ;;  ;   ;   ;;   ;   ;     
+;      ;;;   ;;;;;   ;;;;;          ; ;;;    ;       ;;;;;   ;;; ;  ;    ;   ;;;;;   ;     
+;                                                                                          
+;                                                                                          
+;                                                                                          
+;                                                                                          
+
 #; (-> (and/c (listof move/c) cons?) move/c)
 ;; implemen a tie breaker if there are serveal equally valued player actions:
 ;; in order, apply the following "filters" to reduce the list:
@@ -281,9 +264,21 @@
                                  #hasheq((color . "red") (places . ((1 0) (0 0))) (score . 0))))))
      #:soft #true))
 
-  (define-state ran-move-tree (place-avatar ran-placement-state (place-penguin ran-placement-state))))
+  (define-state ran-move (place-avatar ran-placement-state (place-penguin ran-placement-state))))
 
 ;; ---------------------------------------------------------------------------------------------------
+(module+ test 
+  (check-equal? (place-penguin (create-state 2 2 '(a b) #:fixed 2 #:holes '[[0 0]])) '[0 0] "place 1")
+  
+  (define short-row
+    (let* ([s (create-state 2 2 '(a b) #:holes '[[0 1] [1 1]])]
+           [s (place-avatar s '[0 0])])
+      s))
+  (check-equal? (place-penguin short-row) '[1 0] "place 2")
+
+  (define no-spots (place-avatar short-row '[1 0]))
+  (check-exn #px"not enough" (λ () (place-penguin no-spots)) "bug 3, gen rec out of spots"))
+
 (module+ test
   (check-equal? (place-penguin 2-state-no-action-2) '[0 0] "origin")
   (check-equal? (place-penguin 2-state-1-action-7) '[0 1] "one over")
@@ -297,4 +292,4 @@
   (check-true   (skip? (move-penguin tree-2-state-0-action-1player2)) "cant")
   (check-equal? (move-penguin tree-2-state-1action-first-player) A2-state-1action-first-player)
   (check-equal? (move-penguin tree-3-state-2) A3-state-2)
-  (check-equal? (move-penguin ran-move-tree) '[[0 1] [2 1]] "take the greedy step"))
+  (check-equal? (move-penguin tree-ran-move) '[[0 1] [2 1]] "take the greedy step"))
