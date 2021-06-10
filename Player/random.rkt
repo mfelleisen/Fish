@@ -1,10 +1,7 @@
 #lang racket
 
-;; implement a simple greedy strategy:
-;; -- place penguins on a tile with maximal fish number 
-;; -- move he penguin to a tile with maximal fish number
-;;;   using the `tiebreaker` if there are several 
-
+;; implement a random-pick strategy that avoids the "maximal fish tile" when possible
+;; (This makes the strategy inferior to 'greedy` and thus hopefully testable.) 
 
 ;                                                                  
 ;                                                                  
@@ -27,16 +24,7 @@
 (require (only-in Fish/Common/game-state fishes? turn? move/c))
 (require (only-in Fish/Common/board posn/c))
 
-(provide greedy-strategy)
-
-(module+ examples
-  (provide
-   1row 1column
-   2-state-no-action-2 2-state-1-action-7 2-state-0-action-1player2 2-state-2 3-state-2
-   A2-state-no-action-2 A2-state-1-action-7 A2-state-2 A3-state-2
-   B2-state-no-action-2
-   ran-placement-state
-   ran-move-tree))
+(provide random-strategy)
 
 ;                                                                                                  
 ;                                                                                                  
@@ -60,12 +48,8 @@
 (require (except-in Fish/Common/game-state fishes? turn? move/c))
 (require (except-in Fish/Common/board posn/c))
 
-(module+ examples
-  (require (for-syntax syntax/parse))
-  (require (for-syntax racket/syntax)))
-
 (module+ test
-  (require (submod ".." examples))
+  (require (submod Fish/Player/greedy examples))
   (require rackunit))
 
 ;                                                                                  
@@ -90,7 +74,10 @@
   (define spot* (state-board-traverse s board-lr-td cons))
   (cond
     [(empty? spot*) (error 'place-penguin "not enough spots for placing penguins")]
-    [else (cdr (argmax car spot*))]))
+    [else
+     (define max (argmax car spot*))
+     (define others (filter-map (λ (x) (and (not (= (car max) (car x))) (cdr x))) spot*))
+     (if (empty? others) (cdr max) (random-choice others))]))
   
 (module+ test 
   (check-equal? (place-penguin (create-state 2 2 '(a b) #:fixed 2 #:holes '[[0 0]])) '[0 0] "place 1")
@@ -129,7 +116,7 @@
   (cond 
     [(empty? mapping) #false]
     [(noop? tree)    (caar mapping)]
-    [else (tie-breaker (maximal-fish-step cplayer mapping))]))
+    [else (maximal-fish-step cplayer mapping)]))
 
 (define (maximal-fish-step cplayer mapping)
   (all-max
@@ -140,7 +127,15 @@
 
 (define (all-max fish-steps)
   (define the-max (second (argmax second fish-steps)))
-  (filter-map (λ (x) (and (= (second x) the-max) (first x))) fish-steps))
+  (define others (filter-map (λ (x) (and (< (second x) the-max) (first x))) fish-steps))
+  (if (empty? others)
+      (tie-breaker (filter-map (λ (x) (and (= (second x) the-max) (first x))) fish-steps))
+      (random-choice others)))
+
+;; ---------------------------------------------------------------------------------------------------
+#; {[NEListof X] -> X}
+(define (random-choice lst)
+  (list-ref lst (random (length lst))))
 
 ;; ---------------------------------------------------------------------------------------------------
 #; (-> (and/c (listof move/c) cons?) move/c)
@@ -185,7 +180,7 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 
-(define greedy-strategy (strategy place-penguin move-penguin))
+(define random-strategy (strategy place-penguin move-penguin))
 
 ;                                                                                  
 ;                                                                                  
@@ -204,92 +199,13 @@
 ;                                                                                  
 ;                                                                                  
 
-(module+ examples
-  #; (define-stntax name ...)
-  ;; generates a state `name` and its tree named `tree-name` and its picture named `pict-name`
-  (define-syntax (define-state stx)
-    (syntax-parse stx
-      [(define-state name e0 [(name1 ...) e] ...)
-       #:with tree-name (format-id #'name "tree-~a" (syntax-e #'name))
-       #:with pict-name (format-id #'name "pict-~a" (syntax-e #'name))
-       #'(define-values (name pict-name tree-name)
-           (let*-values ([(name) e0]
-                         [(name1 ... name) e] ...
-                         [(pict _) (render-state name)])
-             (values name pict (generate-tree name))))]))
-  
-  (define-state 2-state-no-action-2 (create-state 2 3 '(x y z) #:fixed 1))
-  (define A2-state-no-action-2 #false)
-  (define B2-state-no-action-2 '[0 0])
-  (define-state 2-state-1-action-7 (create-state 2 3 '(x y z) #:fixed 1)
-    [() (place-avatar 2-state-1-action-7 '[0 0])])
-  (define A2-state-1-action-7 '((0 0) (1 0)))
-  (define-state 2-state-0-action-1player2
-    (create-state 2 2 '(x y) #:fixed 2)
-    [() (create-state 2 2 '(x y) #:fixed 2)]
-    [()  (place-avatar 2-state-0-action-1player2 '[0 0])]
-    [() (next-player (place-avatar 2-state-0-action-1player2 '[1 0]))]
-    [() (next-player (place-avatar 2-state-0-action-1player2 '[0 1]))])
-  (define-state 2-state-1action-first-player 
-    (create-state 2 2 '(x y) #:fixed 2)
-    [() (place-avatar 2-state-1action-first-player '[0 0])]
-    [() (next-player (place-avatar 2-state-1action-first-player '[1 0]))]
-    [() (place-avatar 2-state-1action-first-player '[0 1])])
-  (define A2-state-1action-first-player '[[0 1] [1 1]])
-  (define-state 2-state-2 (create-state 2 3 '(x y) #:fixed 2)
-    [() (next-player (place-avatar 2-state-2 '[1 0]))]
-    [() (place-avatar 2-state-2 '[0 1])]
-    [() (next-player (place-avatar 2-state-2 '[1 1]))])
-  (define A2-state-2 '[[1 0] [0 0]])
-  (define-state 3-state-2 (create-state 2 3 '(x y) #:holes '{[1 2]})
-    [() (next-player (place-avatar 3-state-2 '[1 0]))]
-    [() (place-avatar 3-state-2 '[0 1])]
-    [() (next-player (place-avatar 3-state-2 '[1 1]))])
-  (define A3-state-2 '[[1 0] [0 0]])
-  (define-state special (create-state 2 1 '(x y))
-    [() (place-avatar special '[0 0])])
-
-  (define-state 1column (create-state 1 1 '(x y z w)))
-  
-  (define-state 1row (create-state 1 25 '(x y))
-    [() (next-player (place-avatar 1row '[0 0]))]
-    [() (next-player (place-avatar 1row '[0 1]))]
-    [() (next-player (place-avatar 1row '[0 2]))]
-    [() (next-player (place-avatar 1row '[0 3]))]
-    [() (next-player (place-avatar 1row '[0 4]))]
-    [() (next-player (place-avatar 1row '[0 5]))]
-    [() (next-player (place-avatar 1row '[0 6]))]
-    [() (next-player (place-avatar 1row '[0 7]))])
-
-  (provide ;; additional provides for testing 
-   special
-   tree-2-state-2 tree-3-state-2
-   tree-2-state-1action-first-player
-   A2-state-1action-first-player
-   tree-2-state-0-action-1player2
-   tree-2-state-1-action-7))
-
-(module+ examples
-
-  (require (submod Fish/Common/game-state serialize))
-
-  (define ran-placement-state
-    (state
-     (make-hasheq `((board . ((2 3) (2 1) (5 5)))
-                    (players . ,(list
-                                 #hasheq((color . "white") (places . ((0 1))) (score . 0))
-                                 #hasheq((color . "red") (places . ((1 0) (0 0))) (score . 0))))))
-     #:soft #true))
-
-  (define-state ran-move-tree (place-avatar ran-placement-state (place-penguin ran-placement-state))))
-
 ;; ---------------------------------------------------------------------------------------------------
 (module+ test
   (check-equal? (place-penguin 2-state-no-action-2) '[0 0] "origin")
   (check-equal? (place-penguin 2-state-1-action-7) '[0 1] "one over")
   (check-equal? (place-penguin special) '[1 0] "one down")
   (check-equal? (place-penguin 2-state-0-action-1player2) '[1 1])
-  (check-equal? (place-penguin ran-placement-state) '[2 0] "first argmax of [2 0], [2 2]"))
+  (check-equal? (place-penguin ran-placement-state) '[1 1] "only one non-maximal tile left"))
 
 (module+ test
   (check-equal? (move-penguin (generate-tree 2-state-no-action-2)) A2-state-no-action-2 "final")
@@ -297,4 +213,5 @@
   (check-true   (skip? (move-penguin tree-2-state-0-action-1player2)) "cant")
   (check-equal? (move-penguin tree-2-state-1action-first-player) A2-state-1action-first-player)
   (check-equal? (move-penguin tree-3-state-2) A3-state-2)
-  (check-equal? (move-penguin ran-move-tree) '[[0 1] [2 1]] "take the greedy step"))
+  (check-equal? (move-penguin ran-move-tree) '[[0 1] [1 1]] "go below greedy step"))
+
