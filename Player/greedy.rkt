@@ -23,7 +23,7 @@
 ;                                                                  
 ;                                                                  
 
-(require (only-in Fish/Common/game-tree tree?))
+(require (only-in Fish/Common/rules tree?))
 (require (only-in Fish/Common/game-state fishes? turn? move/c))
 (require (only-in Fish/Common/board posn/c))
 
@@ -56,7 +56,7 @@
 ;                                                                                                  
 
 (require Fish/Player/strategy-interface)
-(require (except-in Fish/Common/game-tree tree?))
+(require (except-in Fish/Common/rules tree?))
 (require (except-in Fish/Common/game-state fishes? turn? move/c))
 (require (except-in Fish/Common/board posn/c))
 

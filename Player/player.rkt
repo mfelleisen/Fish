@@ -61,7 +61,7 @@
 ;                 ;                                                                    
 
 (require Fish/Player/strategy-interface)
-(require (except-in Fish/Common/game-tree))
+(require (except-in Fish/Common/rules))
 (require Fish/Common/game-state)
 (require Fish/Common/internal-player)
 (require Fish/Common/penguin)

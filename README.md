@@ -119,16 +119,13 @@ different organization.
 
 ### TODO
 
-- complete docs 
+- hide 'suspension' more in Tree; it's bad for strategies 
 
-- hide 'suspension' more in Tree 
+- complete docs
+  - how to write a strategy and explore how it performs
+  - how to write a remote player and run a tournament 
 
-- Create naive/deterministic but `fish-count` sensitive strategy.
-  - the strategy
-  - abstract player properly over the strategies it can play
-  - remove release 
-
-- Fix observers, xcall observers, otherwise the referee can crash when the observer crashes.
+- fix observers, xcall observers, otherwise the referee can crash when the observer crashes.
 
 - Move the `trace` contract material into a branch. 
 

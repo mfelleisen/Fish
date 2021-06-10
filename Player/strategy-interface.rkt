@@ -6,7 +6,7 @@
 ;; -- one for helping a player pick a place during the placement phase of the game
 ;; -- another for helping a player move a penguin to a new place during the proper playing phase. 
 
-(require (only-in Fish/Common/game-tree tree?))
+(require (only-in Fish/Common/rules tree?))
 (require (only-in Fish/Common/game-state fishes? turn? move/c))
 (require (only-in Fish/Common/board posn/c))
 

@@ -83,7 +83,7 @@
 (require (except-in Fish/Common/player-interface referee/c))
 (require Fish/Admin/game-observer)
 (require Fish/Common/internal-player)
-(require Fish/Common/game-tree)
+(require Fish/Common/rules)
 (require Fish/Common/game-state)
 (require Fish/Lib/list)
 (require Fish/Lib/xsend)

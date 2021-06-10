@@ -6,7 +6,7 @@ the common ontology between external players and the server.
 ### The APIs
 
 - `player-interface` describes how the service side interacts with players 
-- `game-tree` a data representation for both checking the legality of turns and planning them
+- `rules` a data representation for both checking the legality of turns and planning them
 - `game-state` a data representation of game states: board, orderig of players, knowledge about players 
 - `internal-player` a representation of the knowledge about the players currently in the game 
 - `board` a representation of the game board
