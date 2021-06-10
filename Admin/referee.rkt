@@ -42,6 +42,7 @@
 
 (module+ examples
   (provide
+   r-player1
    ;; individual players 
    player1 player2 player3 player4 
    bad-playing-as
@@ -81,7 +82,6 @@
 
 (require (except-in Fish/Common/player-interface referee/c))
 (require Fish/Admin/game-observer)
-(require Fish/Player/greedy)
 (require Fish/Common/internal-player)
 (require Fish/Common/game-tree)
 (require Fish/Common/game-state)
@@ -89,12 +89,15 @@
 (require Fish/Lib/xsend)
 
 (module+ examples
-  (require Fish/Player/player))
+  (require Fish/Player/player)
+  (require Fish/Player/random)
+  (require Fish/Player/greedy))
 
 (module+ test 
   (require (submod ".." examples))
   (require (submod ".."))
   (require Fish/Player/player)
+  (require Fish/Player/greedy)
   (require rackunit)
   (require SwDev/Testing/check-values))
 
@@ -136,6 +139,7 @@
 (define DEFAULT-COLUMNS 9)
 
 (module+ examples ;; create some players
+  (define r-player1 (new player% [strategy random-strategy]))
   (define player1 (new player% [strategy greedy-strategy]))
   (define iplayer1 (new imperative-player% [strategy greedy-strategy]))
   (define player2 (new player% [strategy greedy-strategy]))
@@ -219,6 +223,7 @@
   (map (λ (group) (map iplayer-payload group)) ranking))
 
 (module+ test
+  (check-equal? (caaar (referee #f #:lop (list r-player1  player1))) player1 "random vs good player")
   
   (check-equal? (caar (referee state-2-9-with-three-regular-players)) players-1-2-3 "3 good ones")
   (check-equal? (caar (referee istate-2-9-with-three-regular-players)) iplayers-1-2-3 "3 i-good ones")
