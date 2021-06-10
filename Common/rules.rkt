@@ -1,6 +1,7 @@
 #lang racket
 
-;; represent entire games as lazy game trees
+;; the game rules, represented complete games as lazy game trees
+;; -- that way a player's strategy can explore the tree in depth 
 
 ;                                                                  
 ;                                                                  
@@ -24,15 +25,17 @@
 
 (provide
 
- ;; {type Node}
- (struct-out node)
+ #; {type Tree}
+ tree-current
 
  (contract-out
-  (tree? contract?)
+  (tree?         contract?)
   (generate-tree (-> fishes? tree?))
-  (final? (-> tree? boolean?))
-  (noop? (-> tree? boolean?))
-  (tree-path (-> tree? turn? ... tree?))
+  (final?        (-> tree? boolean?))
+  (map-branches  (-> tree? any/c (-> turn? tree? any) (listof (list/c turn? any/c))))
+  (noop?         (-> tree? boolean?))
+  (noop          (-> tree? any))
+  (tree-path     (-> tree? turn? ... tree?))
 
   (take-action
    ;; if the tree maps the pair of positions to a tree, return it; otherwise #false
@@ -45,6 +48,14 @@
 (module+ examples
   (provide tree0 tree1 tree3))
 
+(define (map-branches t e f)
+  (cond
+    [(noop? t) (list (list (noop t) e))]
+    [else 
+     (for/list ([1map (tree-mapping t)])
+       (match-define (list step next) 1map)
+       (list step (f step [next])))]))
+  
 ;                                                                                                  
 ;                                                                                                  
 ;        ;                                       ;                             ;                   
@@ -95,16 +106,14 @@
 ;                                                           ;              
 ;                                                                          
 
-(struct node [current mapping] #:prefab)
-#; {type Tree   = [node Fishes [Listof Branch]]}
+(struct tree [current mapping] #:prefab)
+#; {type Tree   = [tree Fishes [Listof Branch]]}
 #; {type Branch = [List Turn [Suspension Tree]]}
 #; {type Turn   = (U SKIP [List Posn Posn])}
 ;; INTERPRETATION SKIP is a symbol that stands for "this player can't act, but others can"
 ;; INTERPRETATION A `Tree` represents the current game state,
 ;; a `Turn` represents a move of the penguin on the first Posn to th second,
 ;; and the thunk returns the `Tree` whose game state is the result of executing this action
-
-(define tree? node?)
 
 ;; ---------------------------------------------------------------------------------------------------
 (define (generate-tree state0)
@@ -120,30 +129,31 @@
           (list (list actions (suspend (on-to-next state))))
           (for/list ([a actions])
             (list a (suspend (on-to-next (move-avatar state (first a) (second a))))))))
-    (node state branches))
+    (tree state branches))
 
   (if (empty? (fishes-players state0))
-      (node state0 '())
+      (tree state0 '())
       (generate-tree state0)))
 
 ;; ---------------------------------------------------------------------------------------------------
-(define (final? tree)
-  (or (empty? (all-actions tree))
-      (empty? (fishes-players (node-current tree)))))
+(define (final? t)
+  (empty? (tree-mapping t)))
 
-(define (all-actions tree)
-  (map first (node-mapping tree)))
+(define (all-actions t)
+  (map first (tree-mapping t)))
 
-(define (noop? tree)
-  (skip? (caar (node-mapping tree))))
+(define (noop? t)
+  (skip? (caar (tree-mapping t))))
+
+(define (noop t) (caar (tree-mapping t)))
 
 ;; ---------------------------------------------------------------------------------------------------
-(define (take-action tree action)
-  (match-define (node _ mapping) tree)
+(define (take-action t action)
+  (match-define (tree _ mapping) t)
   (define domain-element action)
   (cond
     [(empty? mapping) #false]
-    [(noop? tree) (and (symbol? action) [(second (first mapping))])]
+    [(noop? t)       (and (symbol? action) [(second (first mapping))])]
     [else 
      (for/first ([1map mapping] #:when (equal? (first 1map) domain-element))
        [(second 1map)])]))
@@ -175,8 +185,8 @@
 #; (->i ([t tree?]) (#:from (from posn/c) #:to (to posn/c)) (r (listof tree?)))
 ;; step through one level of the given tree along (from,to), (from,*), or *
 ;; ASSUME mapping is not just `skip`
-(define (tree-unfold tree #:from (from #false) #:to (to #false))
-  (match-define (node _ mapping) tree)
+(define (tree-unfold t #:from (from #false) #:to (to #false))
+  (match-define (tree _ mapping) t)
   (filter-map (choose from to) mapping))
 
 #; {Posn (U False Posn) -> [ Branch -> Tree]}
@@ -216,7 +226,7 @@
 ;                                          
 
 (module+ examples
-  (define tree0 (node 2-state-no-action '[]))
+  (define tree0 (tree 2-state-no-action '[]))
   (define tree1 (generate-tree 2-state-1-action))
   (define tree3 (generate-tree 22-state)))
 
@@ -243,8 +253,8 @@
            [u (append-map tree-unfold u)])
       u))
   
-  (check-equal? (map node-current (tree-unfold tree1 #:from '[0 0]))
-                (map node-current (tree-unfold tree1 #:to '[1 0]))  "tree unfold 1")
+  (check-equal? (map tree-current (tree-unfold tree1 #:from '[0 0]))
+                (map tree-current (tree-unfold tree1 #:to '[1 0]))  "tree unfold 1")
   (check-equal? (append-map tree-unfold (append-map tree-unfold (tree-unfold tree3))) '() "unfold 2")
   
   (check-true (noop? tree3)  "skip? tree3")
@@ -278,13 +288,13 @@
 
 #; {PositiveReal -> [Tree -> Pict]}
 (define ((render-root s) tree)
-  (define state (node-current tree))
+  (define state (tree-current tree))
   (define-values (x y) (render-state state))
   (scale (hc-append 5 x y) s))
 
 #; {Tree -> [Listof Tree]}
-(define (unfold1 tree)
-  (define mapping (node-mapping tree))
+(define (unfold1 t)
+  (define mapping (tree-mapping t))
   (for/list ([1map mapping]) [(second 1map)]))
 
 (module+ picts

@@ -411,11 +411,9 @@
     ;; for time management and enbugging
     (when (>= (length actions) (length player*)) (set! first-round #false))
     (cond
-      [(final? tree) (list (node-current tree) cheats)]
+      [(final? tree) (list (tree-current tree) cheats)]
       [else
        (tree-shape-assertion tree0 (reverse actions) tree) ;; for safety
-       #;
-       (spy `[calling ,(get-field me (first player*))])
        (define-values (t+ step o+) (play-turn tree (actions-since-last-turn actions player*) o*))
        (cond
          [step (play t+ o+ (rotate player*) (cons step actions) cheats)]
@@ -430,9 +428,9 @@
 ;; does following the steps in `actions-from-tree0-to-tree` reach 'tree' from `tree0`?
 (define (tree-shape-assertion tree0 actions-from-tree0-to-tree tree)
   (when tree0
-    (define current-state  (node-current tree))
+    (define current-state  (tree-current tree))
     (define computed       (apply tree-path tree0 actions-from-tree0-to-tree))
-    (define computed-state (node-current computed))
+    (define computed-state (tree-current computed))
     (unless (equal? computed-state current-state)
       (printf "comp: ~a\n" computed)
       (printf "actl: ~a\n" tree)
@@ -506,14 +504,14 @@
 (define (play-turn tree actions-taken-since-last (observers '()))
   (parameterize ([time-out-limit (if first-round (ready-time) (time-out-limit))])
     (cond
-      [(noop? tree) (define a (caar (node-mapping tree))) (values (take-action tree a) a observers)]
+      [(noop? tree) (define a (noop tree)) (values (take-action tree a) a observers)]
       [else (play-proper-turn tree actions-taken-since-last observers)])))
 
 #; {Tree [Listof Action] Observer* -> (values Tree (U Action False) Observer*)}
 ;; the active player is now guaranteed to be able to play properly;
 ;; protect against failure and cheaters only 
 (define (play-proper-turn tree actions-taken-since-last observers)
-  (match-define (node state mapping) tree)
+  (define state (tree-current tree))
   (define active   (if (and (not no-bug?) (not first-round))
                        (last (fishes-players state))
                        (first (fishes-players state))))
@@ -531,7 +529,7 @@
        (values msg (generate-tree (delete-player state avatar)) #false)]
     
       [(take-action tree choice-failed)
-       => (λ (t) (values (node-current t) t choice-failed))]
+       => (λ (t) (values (tree-current t) t choice-failed))]
     
       [else
        (define from (first choice-failed))
@@ -543,16 +541,16 @@
   (values state+ act observers+))
 
 (module+ test
-  (define-syntax-rule (2val e) (let-values ([(x y z) e]) (values (node-current x) y z)))
+  (define-syntax-rule (2val e) (let-values ([(x y z) e]) (values (tree-current x) y z)))
   
   (check-values (2val (play-turn tree1 '[]))
-                (node-current tree1-step1)
+                (tree-current tree1-step1)
                 '[[0 0] [1 0]]
                 '[]
                 "the very first turn")
   
   (check-values (2val (play-turn tree1-step1 '[ [[0 0] [1 0]] ]))
-                (node-current tree1-step2)
+                (tree-current tree1-step2)
                 '[[0 1] [1 1]]
                 '[]
                 "the second turn")
