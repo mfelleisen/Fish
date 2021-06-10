@@ -30,9 +30,6 @@
 (require (only-in Fish/Common/board posn/c))
 
 (provide
- strategy-place
- strategy-move
-
  max-map
 
  (contract-out
@@ -86,29 +83,6 @@
 
 (module+ test
   (require rackunit))
-
-;; ---------------------------------------------------------------------------------------------------
-; (struct strategy (place move) #:transparent)
-;; replace struct accessors 
-
-(define *strategy '[])
-
-(define (strategy-place s%)
-  (define o (retrieve s%))
-  (λ (s) (send o place-penguin s)))
-
-(define (strategy-move s)
-  (define o (retrieve s))
-  (λ (t) (send o move-penguin t)))
-
-(define (retrieve s%)
-  (define the-object (assq s% *strategy))
-  (unless the-object
-    (define o (new s%))
-    (define p (cons s% o))
-    (set! *strategy (cons p *strategy))
-    (set! the-object p))
-  (cdr the-object))
 
 ;                                                          
 ;                                                          

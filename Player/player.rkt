@@ -110,7 +110,7 @@
       (set! other-players others)]
     
     (define/public (initial state)
-      ((strategy-place strategy) state))
+      (send strategy place-penguin state))
     
     [define/public (take-turn state actions-since-last-turn)
       (error 'take-turn "abstract")]
@@ -130,7 +130,7 @@
     [define/override (take-turn state actions-since-last-turn)
       (set! tree (generate-tree state))
       ;; I could update the tree here but I'll just stay functional
-      ((strategy-move strategy) tree)]
+      (send strategy move-penguin tree)]
     
     (super-new)))
 
@@ -143,14 +143,14 @@
             (if (empty? actions-of-others-since-last-turn)
                 (generate-tree state)
                 (apply tree-path tree actions-of-others-since-last-turn)))
-      (define best-action ((strategy-move strategy) tree))
+      (define best-action (send strategy move-penguin tree))
       (set! tree (tree-path tree best-action))
       best-action]
     
     (super-new)))
 
 (module+ test
-  (define player (new player% [strategy greedy-strategy]))
+  (define player (new player% [strategy (new greedy-strategy)]))
 
   (check-equal? (send player playing-as (second penguin-colors)) (void))
   (check-equal? (send player playing-with (list (third penguin-colors))) (void))
@@ -166,7 +166,7 @@
   (check-equal? (send player end-of-tournament #t) (void)))
 
 (module+ test
-  (define player! (new imperative-player% [strategy greedy-strategy]))
+  (define player! (new imperative-player% [strategy (new greedy-strategy)]))
 
   (check-equal? (send player! playing-as (second penguin-colors)) (void))
   (check-equal? (send player! playing-with (list (third penguin-colors))) (void))

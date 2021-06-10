@@ -15,13 +15,13 @@
 (error-printing? #true)
 
 ;; -----------------------------------------------------------------------------
-(define player1 (new imperative-player% [strategy greedy-strategy]))
-(define player0 (new player% [strategy greedy-strategy]))
-(define player2 (new player% [strategy greedy-strategy]))
-(define player3 (new player% [strategy greedy-strategy]))
-(define player4 (new player% [strategy greedy-strategy]))
+(define player1 (new imperative-player% [strategy (new greedy-strategy)]))
+(define player0 (new player% [strategy (new greedy-strategy)]))
+(define player2 (new player% [strategy (new greedy-strategy)]))
+(define player3 (new player% [strategy (new greedy-strategy)]))
+(define player4 (new player% [strategy (new greedy-strategy)]))
 
-(define bad-turn-choice  (new bad-turn-choice% [strategy greedy-strategy]))
+(define bad-turn-choice  (new bad-turn-choice% [strategy (new greedy-strategy)]))
 
 (define players-1-2-3 (list player0 player2 player3))
 

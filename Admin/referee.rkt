@@ -139,26 +139,26 @@
 (define DEFAULT-COLUMNS 9)
 
 (module+ examples ;; create some players
-  (define r-player1 (new player% [strategy random-strategy]))
-  (define player1 (new player% [strategy greedy-strategy]))
-  (define iplayer1 (new imperative-player% [strategy greedy-strategy]))
-  (define player2 (new player% [strategy greedy-strategy]))
-  (define iplayer2 (new imperative-player% [strategy greedy-strategy]))
-  (define player3 (new player% [strategy greedy-strategy]))
-  (define iplayer3 (new imperative-player% [strategy greedy-strategy]))
-  (define player4 (new player% [strategy greedy-strategy]))
+  (define r-player1 (new player% [strategy (new random-strategy)]))
+  (define player1 (new player% [strategy (new greedy-strategy)]))
+  (define iplayer1 (new imperative-player% [strategy (new greedy-strategy)]))
+  (define player2 (new player% [strategy (new greedy-strategy)]))
+  (define iplayer2 (new imperative-player% [strategy (new greedy-strategy)]))
+  (define player3 (new player% [strategy (new greedy-strategy)]))
+  (define iplayer3 (new imperative-player% [strategy (new greedy-strategy)]))
+  (define player4 (new player% [strategy (new greedy-strategy)]))
   (define players-1-2-3 (list player1 player2 player3))
   (define iplayers-1-2-3 (list iplayer1 player2 player3))
   (define all-imperative (list iplayer1 iplayer2 iplayer3))
 
-  (define (many-players n) (for/list ([_ (in-range n)]) (new player% [strategy greedy-strategy])))
+  (define (many-players n) (for/list ([_ (in-range n)]) (new player% [strategy (new greedy-strategy)])))
 
-  (define bad-start-of-tournament (new bad-start-of-tournament% [strategy greedy-strategy]))
-  (define bad-playing-as   (new bad-playing-as% [strategy greedy-strategy]))
-  (define bad-playing-with (new bad-playing-with% [strategy greedy-strategy]))
-  (define bad-turn-choice  (new bad-turn-choice% [strategy greedy-strategy]))
-  (define bad-turn-time    (new bad-turn-time% [strategy greedy-strategy]))
-  (define bad-end-of-tournament (new bad-end-of-tournament% [strategy greedy-strategy]))
+  (define bad-start-of-tournament (new bad-start-of-tournament% [strategy (new greedy-strategy)]))
+  (define bad-playing-as   (new bad-playing-as% [strategy (new greedy-strategy)]))
+  (define bad-playing-with (new bad-playing-with% [strategy (new greedy-strategy)]))
+  (define bad-turn-choice  (new bad-turn-choice% [strategy (new greedy-strategy)]))
+  (define bad-turn-time    (new bad-turn-time% [strategy (new greedy-strategy)]))
+  (define bad-end-of-tournament (new bad-end-of-tournament% [strategy (new greedy-strategy)]))
 
   (define one-good-one-bad (list bad-turn-choice player1))
 
@@ -325,7 +325,7 @@
                 "good players grab yeah-many unique places")
   (check-equal? (second (initial-placements state0 players*1)) '[] "good players don't cheat")
   
-  (define players*2 (list player1 (new bad-init-time% [strategy greedy-strategy])))
+  (define players*2 (list player1 (new bad-init-time% [strategy (new greedy-strategy)])))
   (define bst0 (create-state 3 3 players*2 #:fixed 2))
   (check-equal? (second (initial-placements bst0 players*2)) (rest players*2) "good player survives")
   
@@ -366,8 +366,8 @@
                   msg))
 
   (check-values (one-initial-turn state0) (next-player (place-avatar state0 '[0 0])) #f "good acts")
-  (check-bad-init (new bad-init-time% [strategy greedy-strategy]) "time out for bad init time player")
-  (check-bad-init (new bad-init-choice% [strategy greedy-strategy]) "timeout for init choice player"))
+  (check-bad-init (new bad-init-time% [strategy (new greedy-strategy)]) "time out for bad init time player")
+  (check-bad-init (new bad-init-choice% [strategy (new greedy-strategy)]) "timeout for init choice player"))
 
 ;; ---------------------------------------------------------------------------------------------------
 #; {State Posn -> (U False State)}

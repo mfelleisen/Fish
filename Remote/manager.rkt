@@ -132,7 +132,7 @@
 ;                                     
 
 (module+ test
-  (define p1 (new player% [strategy greedy-strategy]))
+  (define p1 (new player% [strategy (new greedy-strategy)]))
   (define b1 (box (gensym)))
 
   (check-equal? ((dispatcher b1 p1) eof) #false)
