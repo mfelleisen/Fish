@@ -70,18 +70,9 @@
     (define/override (evaluate trn state)
       (fish-at (fishes-board (tree-current state)) (second trn)))
 
-    (define/override (choose tie-breaker x+value)
-      (define the-max (max-map second x+value))
-      (define others (select the-max < x+value))
-      (if (empty? others) (tie-breaker (select the-max = x+value)) (random-choice others)))))
+    (define/augment (choose the-max tie-breaker x+value)
+      (select the-max < x+value))))
 
-#; {Real (Real Real -> Boolean) [Listof [List X Real]] -> [Listof X]}
-(define (select the-max = fish-steps)
-  (filter-map (λ (x) (and (= (second x) the-max) (first x))) fish-steps))
-  
-#; {[NEListof X] -> X}
-(define (random-choice lst)
-  (list-ref lst (random (length lst))))
 
 ;                                                                                  
 ;                                                                                  

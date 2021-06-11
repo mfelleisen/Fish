@@ -7,9 +7,7 @@
 ;; -- another for helping a player move a penguin to a new place during the proper playing phase. 
 
 ;; also provide some common auxiliaries for defining strategies:
-;; a tie breaker
-;; a function that finds the maximum of a choose list 
-
+;; -- a selection function for filtering results compared to some value 
 ;                                                          
 ;                                                          
 ;                   ;                                ;;;   
@@ -30,8 +28,6 @@
 (require (only-in Fish/Common/board posn/c))
 
 (provide
- max-map
-
  (contract-out
   (base-strategy%
    (class/c
@@ -46,21 +42,21 @@
      #; turn?            ;; -- when a player can skip or move 
      (->m tree? (or/c #false turn?)))
 
-    (choose
-     ;; abstract
-     ;; chooses an element of the list using the given tie-breaker function
-     (->m (-> [listof any/c] any) [listof [list/c any/c real?]] any/c))
+    (inner
+     (choose
+      ;; abstract
+      ;; chooses an element of the list using the given tie-breaker function
+      (->m real? (-> [listof any/c] any) [listof [list/c any/c real?]] any/c)))
      
     (evaluate
      ;; abstract
      ;; determines the value of a turn that ends up in the given tree situation 
      {->m turn? tree? real?})))
 
-  (tie-breaker
-   ;; implemen a tie breaker if there are serveal equally valued player actions:
-   ;; in order, apply the following "filters" to reduce the list:
-   ;; top-most row of `from` field, `left-most` column of `from`, top-most for `to`, left-most for to
-   (-> (and/c (listof turn?) cons?) turn?))))
+  (select
+   #;(select r cmp l)
+   ;; select the elements x of l for which (cmp r x) holds 
+   (-> real? (-> real? real? boolean?) (listof (list/c any/c real?)) (listof any/c)))))
 
 ;                                                                                      
 ;       ;                                  ;                                           
@@ -120,10 +116,22 @@
     (define/public (evaluate trn tree)
       0)
 
-    (define/public (choose tie-breaker steps+value)
-      (error 'base-strategy% "abstract method: choose"))))
+    (define/pubment (choose tie-breaker steps+value)
+      (define the-max (max-map second steps+value))
+      (define others
+        (inner (error 'base-strategy% "abstract method: choose")
+               choose
+               the-max tie-breaker steps+value))
+      (if (empty? others) (tie-breaker (select the-max = steps+value)) (random-choice others)))))
 
 (define (max-map f lox) (apply max (map f lox)))
+
+(define (select the-max = fish-steps)
+  (filter-map (λ (x) (and (= (second x) the-max) (first x))) fish-steps))
+
+#; {[NEListof X] -> X}
+(define (random-choice lst)
+  (list-ref lst (random (length lst))))
 
 
 
@@ -144,6 +152,14 @@
 ;                                                                                          
 ;                                                                                          
 
+
+
+#;
+(tie-breaker
+ ;; implemen a tie breaker if there are serveal equally valued player actions:
+ ;; in order, apply the following "filters" to reduce the list:
+ ;; top-most row of `from` field, `left-most` column of `from`, top-most for `to`, left-most for to
+ (-> (and/c (listof turn?) cons?) turn?))
 
 (define (tie-breaker lop)
   (define-syntax whittle-down-to-1

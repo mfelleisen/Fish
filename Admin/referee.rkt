@@ -139,7 +139,7 @@
 (define DEFAULT-COLUMNS 9)
 
 (module+ examples ;; create some players
-  (define r-player1 (new player% [strategy (new random-strategy)]))
+  (define r-player1 (new imperative-player% [strategy (new random-strategy)]))
   (define player1 (new player% [strategy (new greedy-strategy)]))
   (define iplayer1 (new imperative-player% [strategy (new greedy-strategy)]))
   (define player2 (new player% [strategy (new greedy-strategy)]))

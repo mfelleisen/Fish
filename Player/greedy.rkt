@@ -86,10 +86,8 @@
     (define/override (evaluate trn state)
       (fish-at (fishes-board (tree-current state)) (second trn)))
     
-    (define/override (choose tie-breaker xvalue)
-      (define the-max (max-map second xvalue))
-      (define all-max (filter-map (λ (x) (and (= (second x) the-max) (first x))) xvalue))
-      (tie-breaker all-max))))
+    (define/augment (choose the-max tie-breaker xvalue)
+      '[])))
 
 ;                                                                                  
 ;                                                                                  
