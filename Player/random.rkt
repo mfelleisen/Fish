@@ -70,7 +70,7 @@
     (define/override (evaluate trn state)
       (fish-at (fishes-board (tree-current state)) (second trn)))
 
-    (define/augment (choose the-max tie-breaker x+value)
+    (define/augment (choose the-max x+value)
       (select the-max < x+value))))
 
 

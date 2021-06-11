@@ -43,15 +43,19 @@
      (->m tree? (or/c #false turn?)))
 
     (inner
+     ;; both place-penguin and move-penguin call into the `choose` hierarchy 
      (choose
-      ;; abstract
-      ;; chooses an element of the list using the given tie-breaker function
-      (->m real? (-> [listof any/c] any) [listof [list/c any/c real?]] any/c)))
+      ;; it hands the inner function
+      ;; -- the max of the list of "valued" elements
+      ;; -- the list oe "valued" elements
+      ;; and expects the list of alternative candidates
+      ;; If this resuult is empty, `choose` picks an element of the maximum-valued elements
+      (->m real? [listof [list/c any/c real?]] any/c)))
      
     (evaluate
-     ;; abstract
+     ;; abstract: `move-penguin` calls this function to assess the value of a new "fish island"
      ;; determines the value of a turn that ends up in the given tree situation 
-     {->m turn? tree? real?})))
+     {->m turn? tree? (and/c real? (compose not negative?))})))
 
   (select
    #;(select r cmp l)
@@ -118,10 +122,7 @@
 
     (define/pubment (choose tie-breaker steps+value)
       (define the-max (max-map second steps+value))
-      (define others
-        (inner (error 'base-strategy% "abstract method: choose")
-               choose
-               the-max tie-breaker steps+value))
+      (define others (inner (error 'base-strategy% "inner missing") choose the-max steps+value))
       (if (empty? others) (tie-breaker (select the-max = steps+value)) (random-choice others)))))
 
 (define (max-map f lox) (apply max (map f lox)))

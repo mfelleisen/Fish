@@ -119,17 +119,14 @@ different organization.
 
 ### TODO
 
-- hide 'suspension' more in Tree; it's bad for strategies 
-
 - complete docs
   - how to write a strategy and explore how it performs
   - how to write a remote player and run a tournament 
 
 - fix observers, xcall observers, otherwise the referee can crash when the observer crashes.
 
-- Move the `trace` contract material into a branch. 
-
-- Develop a `trace` contract for the tournament managers.
+- move the `trace` contract material into a branch. 
+- develop a `trace` contract for the tournament managers.
 
 - There needs to be a configuration struct for setting many parameters: 
   - server: time period, min and max players, etc.
