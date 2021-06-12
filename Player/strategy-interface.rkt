@@ -43,7 +43,10 @@
      (->m tree? (or/c #false turn?)))
 
     (inner
-     ;; both place-penguin and move-penguin call into the `choose` hierarchy 
+     ;; both place-penguin and move-penguin call into the `choose` hierarchy
+     ;; 
+     ;; IT MUST BE __AUGMENTED__ BY ANY CONCRETE STRATEGY,
+     ;; unless both major methods are overridden and don't call choose 
      (choose
       ;; it hands the inner function
       ;; -- the max of the list of "valued" elements
@@ -53,7 +56,7 @@
       (->m real? [listof [list/c any/c real?]] any/c)))
      
     (evaluate
-     ;; abstract: `move-penguin` calls this function to assess the value of a new "fish island"
+     ;; ABSTRACT `move-penguin` calls this function to assess the value of a new "fish island"
      ;; determines the value of a turn that ends up in the given tree situation 
      {->m turn? tree? (and/c real? (compose not negative?))})))
 
