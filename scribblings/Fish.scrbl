@@ -86,6 +86,7 @@ game referees on one side and AI players on the other.
 @table-of-contents[]
 
 @include-section{idea.scrbl}
+@include-section{strategy.scrbl}
 @include-section{ontology.scrbl}
 @include-section{protocol.scrbl}
 @include-section{remote.scrbl}

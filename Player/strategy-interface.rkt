@@ -105,6 +105,7 @@
 
     ;; use left-to-right, top-down traversal to find the first highest-value spot
     (define/public (place-penguin s)
+      #; [Listof [List Posn Natural]]
       (define spot* (state-board-traverse s board-lr-td (λ (x y) (list y x))))
       (when (empty? spot*)
         (error 'place-penguin "not enough spots for placing penguins"))
@@ -114,6 +115,7 @@
       (cond 
         [(final? t) #false]
         [else
+         #; {[Listof [List Turn Natural]]}
          (define steps+value (map-branches t 0 (λ (trn tree) (evaluate trn tree))))
          (choose tie-breaker steps+value)]))
 

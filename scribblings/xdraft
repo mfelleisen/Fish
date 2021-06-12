@@ -1,0 +1,13 @@
+#!/bin/tcsh 
+
+echo 'running' 
+
+scribble --html ++xref-in setup/xref load-collections-xref \
+#          --redirect-main "http://pre.plt-scheme.org/docs/html/" \
+#  "http://docs.plt-scheme.org/" \
+          --dest Tmp/ \
+          $1.scrbl 
+
+echo 'completely done'
+
+open ./Tmp/$1.html
