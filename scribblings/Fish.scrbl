@@ -18,25 +18,9 @@ four players each. Any misbehavior of a player---non-responsiveness due to bugs 
 in immediate termination. So the competition is not just about writing great strategies but also
 delivering robust code.
 
-@verbatim[#:indent 4]{
- +----------------------------+                           +----------------------------+
- | Client                     |                           | Server                     |
- +----------------------------+                           +----------------------------+
- | player mechanism           |                           | tournament manager         |
- | strategy                   | relies on      relies on  | referees                   |
- | GUI mechanism for people?  |-----------+  +------------| observers                  |
- +----------------------------+           |  |            +----------------------------+
-                                          |  |
-                                          v  v
-                 +---------------------------------------------------------+
-                 | the common ontology of Clients and Server               |
-                 +---------------------------------------------------------+
-                 | player interface and protocols                          |
-                 | the rules of the game, expressed as complete game trees |
-                 | formulated in terms of game states                      |
-                 | which are made up of boards, fish, and penguins         |
-                 +---------------------------------------------------------+
-}
+@(require Fish/scribblings/overview)
+
+@centerline[(overview 0.9)]
 
 @bold{The Basic Idea}
 

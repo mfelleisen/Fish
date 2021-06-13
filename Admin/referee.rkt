@@ -90,14 +90,15 @@
 
 (module+ examples
   (require Fish/Player/player)
-  (require Fish/Player/random)
-  (require Fish/Player/greedy))
+  (require (only-in Fish/Player/random random-strategy))
+  (require (only-in Fish/Player/greedy greedy-strategy)))
 
 (module+ test 
   (require (submod ".." examples))
   (require (submod ".."))
   (require Fish/Player/player)
-  (require Fish/Player/greedy)
+  (require (only-in Fish/Player/random random-strategy))
+  (require (only-in Fish/Player/greedy greedy-strategy))
   (require rackunit)
   (require SwDev/Testing/check-values))
 

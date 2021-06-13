@@ -20,7 +20,9 @@
 ;                                                                  
 ;                                                                  
 
-(provide random-strategy)
+(provide
+  random-strategy
+  (rename-out [random-strategy strategy%]))
 
 ;                                                                                                  
 ;                                                                                                  

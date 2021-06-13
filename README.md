@@ -120,7 +120,6 @@ different organization.
 ### TODO
 
 - complete docs
-  - how to write a strategy and explore how it performs
   - how to write a remote player and run a tournament 
 
 - fix observers, xcall observers, otherwise the referee can crash when the observer crashes.

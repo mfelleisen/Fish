@@ -4,8 +4,17 @@ exec racket -tm "$0" -- ${1+"$@"}
 |#
 #lang racket
 
+;; TODO:
+;; parse-arg should return either a number of players or a list of files ptrs
+;; design `make-players` which takes either a number or a list and works from there.
+;;      it returns names and player objects 
+
 ;; usage:
-;; ./xobserve fish = F players = P rows = R columns = C depth = D
+;; ./xobserve --file path-to-file.json 
+;;
+;; xor
+;; 
+;; ./xobserve fish = F players = P rows = R columns = C
 ;; for F, P, R, C and D in Naturals
 ;; The command line may specify these parameters in any order, abd every field is optional.
 ;; 
@@ -21,21 +30,42 @@ exec racket -tm "$0" -- ${1+"$@"}
 (require Fish/Admin/game-observer)
 (require Fish/Common/game-state)
 (require Fish/Player/player)
+(require Fish/Player/greedy)
 (require Fish/Player/human)
 
+(require json)
+
 ;; ---------------------------------------------------------------------------------------------------
-(module+ main
-  (apply main (vector->list (current-command-line-arguments))))
-
 (define (main . n)
-  (define-values (player# rows cols fish depth) (parse-args n))
-
-  (define names   (take '("Benjamin" "Aria" "Emma" "Rachel") player#))
-  (define players (map (λ (n) (new player% [depth depth])) names))
+  (define-values (players names rows cols fish) (configure n))
   (define state0  (create-state rows cols players #:fixed fish))
   (match-define (list rankings failures) (referee state0 #:time-out 5 #:observers (list observer)))
 
   (report-results names players rankings failures))
+
+#; {[Listof String] -> (values [Listof Player] [Listof String] N N N)}
+(define (configure n)
+  (define-values (raws rows cols fish) (parse-args n))
+  (cond
+    [(number? raws)
+     (define names (take '("Benjamin" "Aria" "Emma" "Rachel") raws))
+     (define plers (map (λ (n) (new player% [strategy (new greedy-strategy)])) names))
+     (who-s-playing 'greedy names)
+     (values plers names rows cols fish)]
+    [else
+     (define names (take '("Benjamin" "Aria" "Emma" "Rachel") (length raws)))
+     (define strts (map (λ (s) (new (dynamic-require s 'strategy%))) raws))
+     (define plers (map (λ (s) (new player% [strategy s])) strts))
+     (who-s-playing strts names)
+     (values plers names rows cols fish)]))
+
+#; { (U Symbol [Listof FilePath]) [Listof String] -> Void}
+(define (who-s-playing strts names)
+  (displayln `[The following players are competing])
+  (if (symbol? strts)
+      (for-each displayln (map (λ (n) `[,n with ,(object-name strts)]) names))
+      (for-each displayln (map (λ (n s) `[,n with ,(object-name s)]) names strts))))
+
 
 #; {[Listof String] [Listof [Listof [Instanceof Player]]] [Listof [Instanceof Player]] -> Void}
 (define (report-results names players rankings failures)
@@ -62,20 +92,32 @@ exec racket -tm "$0" -- ${1+"$@"}
  
 #; {String -> Hash}
 (define (parse-args n)
-  (define h (to-hash (string-join n " ")))
+  (define k (string-join n " "))
+  (define h 
+    (cond
+      [(regexp-match #px"--file (.*)" k)
+       =>
+       [match-lambda
+         [(list _ name)
+          (with-input-from-file name read-json)]]]
+      [else
+       (to-hash k)]))
   (define player# (check-player# (dict-ref h 'players 2)))
   (define rows    (check-rows    (dict-ref h 'rows    6)))
   (define cols    (check-cols    (dict-ref h 'columns 6)))
   (define fish    (check-fish    (dict-ref h 'fish    2)))
-  (define depth   (check-depth   (dict-ref h 'depth   2)))
-  (values player# rows cols fish depth))
+  (values player# rows cols fish))
 
 #; {N N FormatString -> X -> N}
 (define ((check-xyz low high err) w)
   (unless (and (natural? w) (<= low w high)) ;; hardwired for now 
     (error 'xobserve err w))
   w)
-(define check-player# (check-xyz 2 4 "number of players expected, given ~e"))
+
+(define (check-list w)
+  (if (list? w) w #false))
+
+(define check-player# (or/c check-list (check-xyz 2 4 "number of players expected, given ~e")))
 (define check-rows    (check-xyz 2 9 "number of rows expected, given ~e"))
 (define check-cols    (check-xyz 2 9 "number of columns expected, given ~e"))
 (define check-fish    (check-xyz 1 5 "number of fish per tile expected, given ~e"))

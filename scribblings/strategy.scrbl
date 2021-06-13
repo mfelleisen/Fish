@@ -96,5 +96,32 @@ ontology, specifically @filepath{Common/game-state} and @filepath{Common/rules}.
 
 
 @; -----------------------------------------------------------------------------
-@bold{How to Evaluate a Tournament With New Strategies}
+@bold{How to Evaluate a Game With New Strategies}
 
+To find out how your strategy compares to say the greedy default strategy,
+navigate to the @tt{Scripts/} directory, set up a configurationn file, and run
+@tt{xobserve}: 
+
+@verbatim[#:indent 4]{
+$ cd Scripts/ 
+$ cat config-s.json 
+
+{ "players" : ["../Player/greedy.rkt",
+	       "../Player/random.rkt",
+	       "../Player/random.rkt"],
+  "rows" : 5,
+  "columns" : 4,
+  "fish" : 2 }
+
+$ ./xobserve --file config-s.json
+(The following players are competing)
+(Benjamin with object:greedy-strategy)
+(Aria with object:random-strategy)
+(Emma with object:random-strategy)
+(Benjamin placed first)
+(Aria placed second)
+(Emma placed second)
+}
+@;
+Between the fourth and fifth line of output, the program pops up a window, which
+is used to display the progress of the game. 

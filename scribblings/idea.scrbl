@@ -34,25 +34,59 @@ penguins they own (caught).}
 ]
 
 @; -----------------------------------------------------------------------------
-@bold{How to Play A Game or Several}
+@bold{How to Play A Game}
 
 Assuming you have installed the repository---see the top entry of the
-@tt{README} file---navigate to the @tt{Scripts} directory and run @tt{xgui}:
+@tt{README} file---navigate to the @tt{Scripts} directory:
+@verbatim[#:indent 4]{
+$ cd Scripts
+}
+
+If you just want to observe a game, run @tt{xobserve}:
 @;
 @verbatim[#:indent 4]{
- $ cd Scripts/
- $ ./xgui n
+$ ./xobserve 
+}
+@;
+You can also configure the game with optional arguments. Here is how to set up
+all four major parameters:  
+@;
+@verbatim[#:indent 4]{
+$ ./xobserve fish=5 players = 4 row = 2 columns = 3
+}
+@;
+Or if you know JSON, you can set up a JSON configuration file and re-direct the
+script to this file:
+@;
+@verbatim[#:indent 4]{
+$ cat config-n.json
+
+{ "players" : 4,
+  "rows" : 5,
+  "columns" : 4,
+  "fish" : 2 }
+  
+$ ./xobserve --file config-n.json 
+}
+@;
+All players will use the same greedy strategy of occupying tiles with high fish
+numbers.
+
+If you wish to play with some number of players, run @tt{xgui}: 
+@;
+@verbatim[#:indent 4]{
+$ cd Scripts/
+$ ./xgui n
 }
 @;
 where n is either 1, 2, or 3. This will start a game for @math{n} automated
 players, each with a pre-determined name, and one human participant.
 
-When the game is over, the program prints the result to the console and starts
-another game with the same participants.
+When the game is over, the program prints the result to the console. 
 
 To terminate the program, use @tt{ctrl-c} at the console. 
 
-@emph{Note} At the moment, the game uses a fixed configuration.  The board is
-@math{5 x 5}, with all possible places occupied by a tile that carries between 1
-and 5 fish. The names of the AI players are fixed. See @emph{todo} in the
-@tt{README}. 
+@emph{Limitation} At the moment, @tt{xgui} uses a fixed configuration.  The
+board is @math{5 x 5}, with all possible places occupied by a tile that carries
+between 1 and 5 fish. The names of the AI players are fixed. See @emph{todo} in
+the @tt{README}.

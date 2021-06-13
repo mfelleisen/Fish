@@ -23,7 +23,9 @@
 ;                                                                  
 ;                                                                  
 
-(provide greedy-strategy)
+(provide
+  greedy-strategy
+  (rename-out [greedy-strategy strategy%]))
 
 (module+ examples
   (provide
