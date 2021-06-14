@@ -28,13 +28,20 @@
 #; {PositiveReal -> Pict}
 (define [overview s]
   (let* {[pic (vc-append 100 (hc-append 300 client server) onto)]
-         [pic (connect pic server lc-find pi) #;(pin-arrow-line 10 pic server lc-find onto ct-find #:start-angle pi #:start-pull .8 #:end-pull 0 #:end-angle (/ pi -2) #:label rely)]
-         [pic (connect pic client rc-find 00) #;(pin-arrow-line 10 pic client rc-find onto ct-find #:start-angle 00 #:start-pull .8 #:end-pull 0 #:end-angle (/ pi -2) #:label rely)]}
+         [pic (connect pic server lc-find pi)]
+         [pic (connect pic client rc-find 00)]
+         [pic (pin-arrow-line 10 pic client rc-find server lc-find #:label (text "communicate via"))]
+         [pic (pin-arrow-line 10 pic server lc-find client rc-find)]}
     (scale pic s)))
 
 #; { Pict -> Pict}
 (define (connect pic server lc-find aa)
-  (pin-arrow-line 10 pic server lc-find onto ct-find #:start-angle aa #:start-pull .8 #:end-pull 0 #:end-angle (/ pi -2) #:label rely))
+  (pin-arrow-line 10 pic server lc-find onto ct-find
+                  #:start-angle aa
+                  #:start-pull .8
+                  #:end-pull 0
+                  #:end-angle (/ pi -2)
+                  #:label rely))
 
 #; {String String ... -> Pict}
 (define (box title . lines)
