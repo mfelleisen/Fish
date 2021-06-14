@@ -1,0 +1,10 @@
+
+{ "players" : ["../Player/greedy.rkt",
+	       "../Player/random.rkt",
+	       "../Player/random.rkt"],
+  "rows" : 5,
+  "columns" : 4,
+  "fish" : 2 }
+
+
+
