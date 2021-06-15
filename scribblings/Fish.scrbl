@@ -60,14 +60,14 @@ The communication between server and clients is TCP-based, using JSON-formatted 
 @; -----------------------------------------------------------------------------
 @bold{How to Read the Docs}
 
-The @blue{blue sections} explains how to play. The @purple{purple sections}
-spell out how to test new strategies in Racket. The @red{red sections} explain
-the remote protocol, that is, they specify how to run local/remote tournaments
-with players build in arbitrary programming languages. The last two share the
-@black{black section}, on the common ontology between tournament managers and
-game referees on one side and AI players on the other. 
+The @blue{blue section} explains how to play. The @purple{purple section} spell
+out how to test new strategies in Racket. The @red{red sections} explain the
+interaction protocols, that is, they specify how local/remote AI players connect
+to the administrative software, the referee and the tournament manager. They
+rely on the @bold{black section}, which explains the ontology that governs these
+interactions.
 
-@table-of-contents[]
+@;table-of-contents[]
 
 @include-section{idea.scrbl}
 @include-section{strategy.scrbl}

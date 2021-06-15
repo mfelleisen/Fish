@@ -1,6 +1,7 @@
 #lang racket
 
-;; cretae a picture of a hexagon tile with fishes, determine basic physical parameters of visuals
+;; represents tiles with fish on them
+;; determine some basic physical parameters of the visuals
 
 ;                                                                  
 ;                                                                  
