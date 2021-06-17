@@ -120,14 +120,17 @@ different organization.
 ### TODO
 
 - complete docs
-  - how to write a remote player and run a tournament 
-
+  - how to write a remote player and run a tournament
+  
 - fix observers, xcall observers, otherwise the referee can crash when the observer crashes.
+  - use eventspace-thread better? 
 
 - move the `trace` contract material into a branch. 
 - develop a `trace` contract for the tournament managers.
 
 - There needs to be a configuration struct for setting many parameters: 
+  - factor out the command-line/JSON parsing from `xobserve` 
+
   - server: time period, min and max players, etc.
   - manager: 
   - referee: how to set up the board (row, column, fish vs random; holes vs no holes); time per call 

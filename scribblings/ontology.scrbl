@@ -3,7 +3,7 @@
 @(require "shared.rkt")
 
 @; -----------------------------------------------------------------------------
-@title{@black{The Common Ontology}}
+@title{@red{The Common Ontology}}
 
 For participants to connect players to the server, they need to understand the
 interaction protocols, both the logical protocol and the remote protocol. The
@@ -82,3 +82,4 @@ protocols:
 -- remote-protocol-play-turn.txt
 -- remote-protocol-end-tournament.txt
 }
+The next two sections explain the role of these diagrams. 

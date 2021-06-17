@@ -62,10 +62,10 @@ The communication between server and clients is TCP-based, using JSON-formatted 
 
 The @blue{blue section} explains how to play. The @purple{purple section} spell
 out how to test new strategies in Racket. The @red{red sections} explain the
-interaction protocols, that is, they specify how local/remote AI players connect
-to the administrative software, the referee and the tournament manager. They
-rely on the @bold{black section}, which explains the ontology that governs these
-interactions.
+interaction protocols, that is, they specify how local or remote AI players
+connect to the administrative software, the referee and the tournament
+manager. It starts with a section on how to navigate the modules in
+@tt{Common/}, which implement the meaning of all interactions.
 
 @;table-of-contents[]
 

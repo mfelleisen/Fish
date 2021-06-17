@@ -24,7 +24,7 @@
    (build-path (getenv "HOME") "Hub" "Fish" "Common" (~a "remote-" file)))
 
 @; -----------------------------------------------------------------------------
-@title[#:tag "remote"]{@red{Remote Interactions}}
+@title[#:tag "remote"]{@red{CO: Remote Interactions}}
 
 @author{Matthias Felleisen}
 
