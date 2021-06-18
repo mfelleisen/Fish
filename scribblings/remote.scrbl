@@ -26,26 +26,41 @@
 @; -----------------------------------------------------------------------------
 @title[#:tag "remote"]{@red{CO: Remote Interactions}}
 
-@author{Matthias Felleisen}
+A remote player connects to a server via TCP. It is the server's responsibility
+to collect connections to remote players, to represent them, and to hand them to
+the tournament manager when the conditions are right.
 
-The interaction between Racket player components and the Racket admin framework
-is governed by the set of following interaction diagrams. Straight line denote
-logical calls, squiggly lines remote messages or calls. Unless otherwise noted,
-the diagrams use the same conventions as @secref{local protocol}.
+The interaction between remote players and the Racket framework is governed by
+the set of following interaction diagrams. Straight line denote logical calls,
+squiggly lines remote messages or calls. The format of the JSON messages is
+specified below all diagrams in a single place. 
+
+The first diagram is about connecting to the server; the remaining ones specify
+how the logical interaction diagrams of @secref{local protocol} are realized via
+message sending.
+
+Unless otherwise noted, the diagrams use the same conventions as
+@; KEEP ON ONE LINE 
+@secref{local protocol}. 
+
+@bold{Note} The diagrams specify far more than is necessary to understand the
+connection between a remote player and the server. These details are listed as a
+teaching device.
 
 @; -----------------------------------------------------------------------------
 @blue{Connecting to the Server}
 
 @include-protocol{protocol-connect.txt}
 
-@bold{Note} The name consist of at least one and at most 12 alphabetical ASCII characters. There is no guarantee that distinct clients sign up with distinct names. It is expected within 10s of opening a connection.
+@bold{Note} There is no guarantee that distinct clients sign up with distinct
+names, and there is no need to worry about this for this framework. 
 
-The server accepts TCP connections and represents each as a remote player once the client has submitted a name.  Once
-a sufficient number of players have connected to the server and the waiting
-period is over, the server signs up these players for a tournament with the
-manager and asks it to run a complete tournament.@margin-note*{In real-world
-settings, the server may put players that arrive after the waiting period into a
-"waiting room."}
+The server accepts TCP connections and represents each as a remote player once
+the client has submitted a name.  When a sufficient number of players have
+connected to the server and the waiting period is over, the server signs up
+these players for a tournament with the manager and asks it to run a complete
+tournament.@margin-note*{In real-world settings, the server may put players that
+arrive after the waiting period into a "waiting room."}
 
 @blue{Starting a Tournament}
 

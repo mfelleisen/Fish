@@ -4,7 +4,7 @@ server                           client (c_1) ... client (c_n)
   |                                |                 | 
   |< ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ |                 | tcp connect 
   |                                |                 |
-  |   name as JSON string          |                 |
+  |   name as JSON string          |                 | *
   |< ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ |                 | no reply 
   |                                |                 |
   |                                |                 |
@@ -17,7 +17,7 @@ server                           client (c_1) ... client (c_n)
   .        |                       .                 .
   |< ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ | tcp connect
   |        |                       |                 |
-  |   name as JSON string          |                 |
+  |   name as JSON string          |                 | *
   |< ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ | no reply 
   |        |                       |                 |
   |        |                       |                 |
@@ -32,3 +32,6 @@ server                           client (c_1) ... client (c_n)
   |                                     |
   |                                     |
   |                                     |
+
+* The name consist of at least one and at most 12 alphabetical ASCII characters.
+  The server expects to receive a name within 10s after the connection is established. 
