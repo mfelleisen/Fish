@@ -74,3 +74,4 @@ manager. It starts with a section on how to navigate the modules in
 @include-section{ontology.scrbl}
 @include-section{protocol.scrbl}
 @include-section{remote.scrbl}
+@include-section{player.scrbl}
