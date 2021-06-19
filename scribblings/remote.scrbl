@@ -32,12 +32,18 @@ the tournament manager when the conditions are right.
 
 The interaction between remote players and the Racket framework is governed by
 the set of following interaction diagrams. Straight line denote logical calls,
-squiggly lines remote messages or calls. The format of the JSON messages is
-specified below all diagrams in a single place. 
+squiggly lines remote messages or calls.
 
-The first diagram is about connecting to the server; the remaining ones specify
-how the logical interaction diagrams of @secref{local protocol} are realized via
-message sending.
+The format of the JSON messages is specified below all diagrams in a
+single place.
+
+@bold{Organization} The first diagram is about connecting to the server. The
+remaining ones specify how the logical interaction diagrams of
+@; KEEP ON ONE LINE 
+@secref{local protocol}
+@;
+are realized via message sending. There is no essential change to the logical
+protocol. The revised diagrams merely indicate how calls turn into TCP messages.
 
 Unless otherwise noted, the diagrams use the same conventions as
 @; KEEP ON ONE LINE 
@@ -84,13 +90,12 @@ The protocol for running a tournament remains the same.
 
 @blue{Method Call Formats}
 
-The logical protocol comprises the six function calls and all we have to do is
-describe the JSON format so that logical calls can be realized as remote calls
-between components in different languages.
-
-Here is the general format of a function call:
+The logical protocol comprises the six function calls. Each of those is realized
+as a remote call, with the table below specifying how the call and the return
+values are represented as JSON values. 
+@;
 @verbatim[#:indent 4]{
-[ String, [@tech{Argument}, ...] ]
+[ MethodName, [@tech{Argument}, ...] ]
 }
 combining the method name (as below but as a String) with an array of arguments:
 @;
@@ -98,87 +103,56 @@ combining the method name (as below but as a String) with an array of arguments:
    @messages[
  [ [ start         Boolean                                  ] "void"              ]
  [ [ playing-as    @tech{Color}                             ] "void"              ]
- [ [ playing-with  [@tech{Color} (~a " ... ")  @tech{Color}]] "void"          "&" ]
- [ [ setup         @tech{State}                            ] @tech{Position}  "^" ]
- [ [ take-turn     @tech{State} [@tech{Action} (~a " ... ") @tech{Action}] ] @tech{Action} "*, ^"]
+ [ [ playing-with  [@tech{Color} (~a " ... ")  @tech{Color}]] "void"           ]
+ [ [ setup         @tech{State}                            ] @tech{Position}   ]
+ [ [ take-turn     @tech{State} [@tech{Action} (~a " ... ") @tech{Action}] ] @tech{Action} ]
  [ [ end           Boolean                                  ] "void"              ]
-]
+]]
 
 @; -----------------------------------------------------------------------------
 
-@t{Next the referee assigns each player a different penguin-color. The
-available @deftech{Colors} are:
-@(element-join (map (compose tt ~s) penguin-colors) ", ")
+@; [#:indent 4]
 
-Each player receives @math{6 - N} penguins where @math{N} is the number of
-players that participate in the game.}
+@verbatim{
 
-@verbatim[#:indent 4]{
+@deftech{Color} is one of: @(element-join (map (compose tt ~s) penguin-colors) ", ").
+  @bold{Note} The referee assigns them in this order. 
 
 @deftech{State} is 
-  { @(tt (~s (symbol->string PLAYERS))) : @tech{Player*},
-    @(tt (~s (symbol->string BOARD))) : @tech{Board} }
+  { @(tt (~s (symbol->string PLAYERS))) : [@tech{Player}, ..., @tech{Player}], @(tt (~s (symbol->string BOARD))) : @tech{Board} }.
 
-@deftech{Player*} is
-  [@tech{Player}, ..., @tech{Player}]
-INTERPRETATION The array lists all players and specifies the order
-in which they take turns. 
+  @bold{Interpretation} The array lists the current state of all players 
+  and specifies the order in which they take turns. The board field
+  conveys the current state of the board. 
+
+  @bold{Constraint} All players' penguins must occupy mutually
+  distinct positions on the board. 
 
 @deftech{Player} is
-  { @(tt (~s (symbol->string COLOR))) : @tech{Color},
-    @(tt (~s (symbol->string SCORE))) : Natural,
-    @(tt (~s (symbol->string PLACES))) : [@tech{Position}, ..., @tech{Position}] }
-INTERPRETATION The color identifies a player's penguins on the board,  
-the score represents how many fish the player has collected so far,
-and the last field shows where the player's penguins are located. 
+  { @(tt (~s (symbol->string COLOR))) : @tech{Color}, @(tt (~s (symbol->string SCORE))) : Natural, @(tt (~s (symbol->string PLACES))) : [@tech{Position}, ..., @tech{Position}] }
 
-CONSTRAINT All penguins must occupy distinct tiles on the board.}
-
-@verbatim[#:indent 4]{
-
-@deftech{Board-Posn} is 
-  { @(tt (~s (symbol->string POSITION))) : @tech{Position},
-    @(tt (~s (symbol->string BOARD))) : @tech{Board}}
+  @bold{Interpretation} The color identifies a player's penguins on the board, 
+  the score represents how many fish the player has collected so far, 
+  and the last field shows where the player's penguins are located.
     
-@deftech{Board} is a JSON array of JSON arrays where each element is
-either 0 or a number between 1 and @(~a @MAX-FISH).
-The size of the board may not exceed a total of 25 spots.
-INTERPRETATION A 0 denotes a hole in the board configuration. All other
-numbers specify the number of fish displayed on the tile. 
+@deftech{Board} is
+  [ [@tech{Fish#}, ..., @tech{Fish#}], ..., [@tech{Fish#}, ..., @tech{Fish#}] ]
+  where @deftech{Fish#} is a Natural between 0 and @(~a @MAX-FISH) (inclusive). 
 
-@deftech{Position} is a JSON array that contains two natural numbers:
-  [board-row,board-column].
-INTERPRETATION The position uses the computer graphics coordinate system
-  meaning the Y axis points downwards. The position refers to a tile with at least one fish on it.}
+  @bold{Interpretation} A 0 denotes a hole in the board configuration. 
+  All other numbers specify the number of fish on the respective tile.
+  The longest row determines the width of the board; rows shorter than 
+  that are missing tiles, which is equivalent to 0s. 
 
-@verbatim[#:indent 4]{@deftech{Action} is
- either
-   false
- or
-  [ @tech{Position}, @tech{Position} ]
- INTERPRETATION The array describes the opponent's move from the first
- position to the second; if the desired kind of move isn't possible, the
- harness delivers false.}
+@deftech{Position} [Natural, Natural].
 
-@; -----------------------------------------------------------------------------
+  @bold{Interpretation} The position specifies a row and a column.
+  The origin is [0,0]. 
 
-@t{& The array of @tech{Color}s informs a player how many opponents it faces and
-the colors that observers use to show them on the game board.}
 
-@t{* The array of @tech{Action}s represents the penguin moves since
-the last time the @tt{take-turn} method was called. It is empty if
-this is the first call or a player was eliminated since the last
-call. A method may use the state to compute a response
-functionally xor its own private version of a game tree plus the array
-of actions to figure out a response imperatively. The latter allows
-caching of tree walks to some extent.}
-
-@t{^ As @tech{State} is used for placing penguins and moving them, it
-merely lives up the state specification. That is, it does not satisfy
-the post-placement-phase constraints used in past test fests (a
-sufficient number of penguins for the given players).}]
-@;
-
-@bold{Note} A server or a client may not assume that JSON is well-formed or
-valid. 
-
+@deftech{Action} is one of:
+  - false
+  - [ @tech{Position}, @tech{Position} ]
+ 
+  @bold{Interpretation} The array describes the opponent's move from the 
+  first position to the second.}

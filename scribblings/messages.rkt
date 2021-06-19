@@ -21,6 +21,9 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (begin-for-syntax
+  (define (are-there-notes lo-rows)
+    (for/first ([row (syntax->list lo-rows)] #:when (> (length (syntax->list row)) 2)) #t))
+
   (define-syntax-class abbrev
     [pattern x:id  #:attr fmt #'@tt{@(~a 'x)}]
     [pattern x:str #:attr fmt #'@tt{@(~s 'x)}]
@@ -33,10 +36,12 @@
   (syntax-parse stx
     [(_ one ...)
      #:with def-arg #'(elem (deftech "Argument")", ...")
-     #'(tabular
+     #:do [(define notes? (are-there-notes #'(one ...)))]
+     #:with notes (if notes? #'"Note" #'"  ")
+     #`(tabular
         #:row-properties '(bottom-border top) #:sep @hspace[4]
         (cons
-         @list[ @t{Name} def-arg @deftech{Result}  @t{Note}]
+         @list[ @t{MethodName} def-arg @deftech{Result}  notes]
          @; --------------------------------------------------------------
          (list (1msg one) ...)))]))
 
@@ -49,12 +54,21 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module+ test
   
- @messages[
+  @messages[
  [ [ start         Boolean                                  ] "void"                 ]
  [ [ playing-as    @tech{Color}                             ] "void"                 ]
  [ [ playing-with  [@tech{Color} (~a " ... ")  @tech{Color}]] "void"                 ]
  [ [ setup         @tech{State}                             ] @tech{Position}        ]
  [ [ take-turn     @tech{State} @tech{Actions}              ] @tech{Action}      "*" ]
+ [ [ end           Boolean                                  ] "void"                 ]
+ ]
+
+  @messages[
+ [ [ start         Boolean                                  ] "void"                 ]
+ [ [ playing-as    @tech{Color}                             ] "void"                 ]
+ [ [ playing-with  [@tech{Color} (~a " ... ")  @tech{Color}]] "void"                 ]
+ [ [ setup         @tech{State}                             ] @tech{Position}        ]
+ [ [ take-turn     @tech{State} @tech{Actions}              ] @tech{Action}       ]
  [ [ end           Boolean                                  ] "void"                 ]
  ]
   )
