@@ -62,11 +62,11 @@ the result to the console.
 You can also configure the game with optional arguments:
 @;
 @verbatim[#:indent 4]{
-$ ./xplay players = 3					[1]
+$ ./xplay players = 3                                   [1]
 ... 
-$ ./xplay players = 1 row = 4 columns = 3		[2]
+$ ./xplay players = 1 row = 4 columns = 3               [2]
 ... 
-$ ./xplay players = 3 row = 4 columns = 3 fish=5	[3]
+$ ./xplay players = 3 row = 4 columns = 3 fish=5        [3]
 ... 
 }
 @;
