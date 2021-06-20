@@ -115,13 +115,17 @@ $ cat config-s.json
 
 $ ./xobserve --file config-s.json
 (The following players are competing)
-(Benjamin with object:greedy-strategy)
-(Aria with object:random-strategy)
+(Bob with object:greedy-strategy)
+(Aster with object:random-strategy)
 (Emma with object:random-strategy)
-(Benjamin placed first)
-(Aria placed second)
+-----------------------------------
+(Bob placed first)
+(Aster placed second)
 (Emma placed second)
 }
 @;
 Between the fourth and fifth line of output, the program pops up a window, which
-is used to display the progress of the game. 
+is used to display the progress of the game.  Here the greedy player won over
+the random player, which is explicitly programmed to be worse than greedy, if
+possible, and to make random choices. So the result meets the expectations.
+

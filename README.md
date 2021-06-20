@@ -123,6 +123,7 @@ different organization.
   - how to write a remote player and run a tournament
   
 - fix observers, xcall observers, otherwise the referee can crash when the observer crashes.
+  - closing the windows should shut down things 
   - use eventspace-thread better? 
 
 - move the `trace` contract material into a branch. 

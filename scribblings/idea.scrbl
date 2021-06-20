@@ -48,14 +48,33 @@ If you just want to observe a game, run @tt{xobserve}:
 $ ./xobserve 
 }
 @;
-You can also configure the game with optional arguments. Here is how to set up
-all four major parameters:  
+
+If you wish to play with some number of players, run @tt{xplay}: 
 @;
 @verbatim[#:indent 4]{
-$ ./xobserve fish=5 players = 4 row = 2 columns = 3
+$ ./xplay
 }
 @;
-Or if you know JSON, you can set up a JSON configuration file and re-direct the
+This command-line will start a game with a fixed configuration of some mechanical
+players plus one GUI for a human player. When the game is over, the program prints
+the result to the console.
+
+You can also configure the game with optional arguments:
+@;
+@verbatim[#:indent 4]{
+$ ./xplay players = 3					[1]
+... 
+$ ./xplay players = 1 row = 4 columns = 3		[2]
+... 
+$ ./xplay players = 3 row = 4 columns = 3 fish=5	[3]
+... 
+}
+@;
+Line 1 overrides the default number of players. Line 2 also overrides the row x
+column format. And line 3 tells the script to place 5 fish on every tile, making
+the game deterministic and boring. 
+
+If you know JSON, you can set up a JSON configuration file and point the
 script to this file:
 @;
 @verbatim[#:indent 4]{
@@ -66,27 +85,8 @@ $ cat config-n.json
   "columns" : 4,
   "fish" : 2 }
   
-$ ./xobserve --file config-n.json 
+$ ./xplay --file config-n.json 
 }
 @;
-All players will use the same greedy strategy of occupying tiles with high fish
-numbers.
 
-If you wish to play with some number of players, run @tt{xgui}: 
-@;
-@verbatim[#:indent 4]{
-$ cd Scripts/
-$ ./xgui n
-}
-@;
-where n is either 1, 2, or 3. This will start a game for @math{n} automated
-players, each with a pre-determined name, and one human participant.
-
-When the game is over, the program prints the result to the console. 
-
-To terminate the program, use @tt{ctrl-c} at the console. 
-
-@emph{Limitation} At the moment, @tt{xgui} uses a fixed configuration.  The
-board is @math{5 x 5}, with all possible places occupied by a tile that carries
-between 1 and 5 fish. The names of the AI players are fixed. See @emph{todo} in
-the @tt{README}.
+To terminate the program before the game is over, use @tt{ctrl-c} at the console. 
