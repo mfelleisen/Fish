@@ -5,16 +5,18 @@ exec racket -tm "$0" -- ${1+"$@"}
 #lang racket
 
 ;; usage:
-;; ./xobserve --file path-to-file.json 
+;; ./xplay --file path-to-file.json 
 ;;
 ;; xor
 ;; 
-;; ./xobserve fish = F players = P rows = R columns = C
+;; ./xplay fish = F players = P rows = R columns = C
 ;; for F, P, R, C and D in Naturals
 ;; The command line may specify these parameters in any order, abd every field is optional.
 ;; 
+;; The number of players must be less than 4 so the script can add a human. 
+;; 
 ;; example: 
-;; ./xobserve fish=5 players = 4 row = 2 columns = 9 
+;; ./xplay fish=5 players = 3 row = 2 columns = 9 
 
 ;; main n:natural runs a game with n AI players and one human controled player, plus one observer 
 
@@ -24,12 +26,21 @@ exec racket -tm "$0" -- ${1+"$@"}
 (require Fish/Admin/referee)
 (require Fish/Admin/game-observer)
 (require Fish/Common/game-state)
+(require Fish/Player/player)
+(require Fish/Player/human)
+
 (require Fish/Scripts/report-results)
 (require Fish/Scripts/configure)
 
 ;; ---------------------------------------------------------------------------------------------------
 (define (main . n)
   (define-values (players names make-state) (configure n))
-  (define state0 (make-state players))
-  (match-define (list rankings failures) (referee state0 #:time-out 3 #:observers (list observer)))
+  (unless (< (length players) 4)
+    (printf "usage: ./xplay player = n .. config ..\n")
+    (printf "       where n is 1, 2, or 3\n")
+    (exit 1))
+  (define the-human (new human%))
+  (define state0  (make-state (cons the-human players)))
+  (match-define (list rankings failures) (referee state0 #:time-out 20))
   (report-results names players rankings failures))
+
