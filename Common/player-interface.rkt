@@ -127,6 +127,8 @@
 #; {Contrac Contract Contract -> Contract}
 (define (make-referee-player%/c this/c state/c actions/c)
   (class/c
+   ;; it has to be a strategy but we don't want to depend on strategy.rkt
+   (init-field (strategy object?))
    [playing-as
     ;; the referee informs this player of the assigned color 
     (->m penguin-color/c any)]
@@ -227,10 +229,14 @@
     #' `[[,(? natural? row0) ,(? natural? col0)] [,(? natural? row1) ,(? natural? col1)]])
 
   (define (action? a)
-    (match a [(action a b c d) #t][_ #f]))
+    (match a
+      [(action a b c d) #t]
+      [(? string?) #t]
+      [_ #f]))
 
-  (define (action->jsexpr s) s)
+  (define (action->jsexpr s) (if (symbol? s) (~a s) s))
   
   (define (jsexpr->action s)
     (match s
+      [(? string?) (string->symbol s)]
       [(action row0 col0 row1 col1) s])))
