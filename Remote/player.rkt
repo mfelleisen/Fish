@@ -78,7 +78,7 @@
   (new remote-player% [in in] [out out]))
 
 (define remote-player%
-  (class object% [init-field in out]
+  (class object% [init-field in out (strategy 'just-to-satisfy-the-contract)]
     (super-new)
 
     (define-syntax (define/remote stx)
