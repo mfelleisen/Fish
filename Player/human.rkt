@@ -73,7 +73,7 @@
 (define COLUMNS 8)
 
 (define human%
-  (class object%
+  (class object% (init-field (strategy 'just-to-satisfy-the-contract))
 
     ;; -----------------------------------------------------------------------------------------------
     ;; tournament methods 
