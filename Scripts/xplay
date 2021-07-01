@@ -26,8 +26,8 @@ exec racket -tm "$0" -- ${1+"$@"}
 (require Fish/Admin/referee)
 (require Fish/Player/human)
 
-(require Fish/Scripts/report-results)
-(require Fish/Scripts/configure)
+(require Fish/Scripts/Private/report-results)
+(require Fish/Scripts/Private/configure)
 
 ;; ---------------------------------------------------------------------------------------------------
 (define (main . n)

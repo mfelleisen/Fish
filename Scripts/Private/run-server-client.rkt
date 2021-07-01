@@ -35,11 +35,11 @@
 (define PORT-STARTER-FILE "port-starter-file.rktl")
 
 ;; ---------------------------------------------------------------------------------------------------
-(define (run-server p)
+(define (run-server p #:house (house-players '[]))
   (unless (port/c p)
     (error 'xserver "port number expected, given ~e" p))
-  (match-define [list winners cheats-and-failures] (server p))
-  (send-message `[,(length winners) ,(length cheats-and-failures)]))
+  (match-define [list winners cheats-and-failures] (server p house-players))
+  (send-message `[,(~a winners) ,(~a cheats-and-failures)]))
 
 ;; ---------------------------------------------------------------------------------------------------
 (define (run-clients port players ip)
@@ -65,7 +65,7 @@
     (close-input-port in)
     (close-output-port out)
     (custodian-shutdown-all cust))
-  (values in 'out tear-down))
+  (values in out tear-down))
 
 ;; ---------------------------------------------------------------------------------------------------
 (define (report-results passed total-test-count)

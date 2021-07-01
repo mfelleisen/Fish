@@ -4,7 +4,7 @@
  configure-state
 
  #; {[Listof String] -> (values [Listof Player] [Listof String] [ [Listof Player] -> State])}
- ;; creates a list of players, their names, # of rows, # of columns, constant # of fish
+ ;; creates a list of players, their names, and a function that maps players to an initial game state 
  ;; the defaults are specified below 
  ;; the user can override them with commandline arguments xor a JSON config file 
  configure)
