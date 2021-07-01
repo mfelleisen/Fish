@@ -12,9 +12,6 @@ exec racket -W error -tm "$0" -- ${1+"$@"}
 (require Fish/Scripts/Private/run-server-client)
 
 ;; ---------------------------------------------------------------------------------------------------
-(module+ main
-  (apply main (vector->list (current-command-line-arguments))))
-
 (define (main p-str)
   (define p (string->number p-str))
   (displayln `[starting a server on ,p])
