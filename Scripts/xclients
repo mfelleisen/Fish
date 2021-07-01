@@ -4,23 +4,22 @@ exec racket -tm "$0" -- ${1+"$@"}
 |#
 #lang racket
 
-;; main n:natural runs a game with n AI players locally pointing them to 
+;; ./xclients n:natural? p:listen-port-no?
+;; points n remote greedy players to port p 
 
 (provide main)
 
 ;; ---------------------------------------------------------------------------------------------------
 (require Fish/Player/player)
+(require Fish/Player/greedy)
 (require Fish/Scripts/Private/run-server-client)
 
 ;; ---------------------------------------------------------------------------------------------------
-(module+ main
-  (apply main (vector->list (current-command-line-arguments))))
-
 (define (main player#-str p-str [ip LOCALHOST])
   (define player# (string->number player#-str))
   (unless (and player# (natural? player#))
     (error 'xclient "number of players expected, given ~e" player#-str))
   (define p (string->number p-str))
-  (define players (build-list player# (λ _ (new player% [depth 2]))))
+  (define players (build-list player# (λ _ (new player% [strategy (new strategy%)]))))
   (displayln `[pointing ,player# clients at ,ip on port ,p])
   (run-clients p players ip))
