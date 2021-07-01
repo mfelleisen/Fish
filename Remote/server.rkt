@@ -23,8 +23,6 @@
 
 (define port/c (and/c natural-number/c (</c 60000) (>/c 10000)))
 (define player#/c natural-number/c)
-(define secs/c natural-number/c)
-(define named-results/c [list/c [listof [listof string?]] [listof string?]])
 
 (provide
  (contract-out
@@ -33,7 +31,7 @@
    ;; returns the list of winners and cheaters/failures 
    ;; runsning an manager on the N players that connected on port# in
    ;; wait-for-sec seconds or N >= player# as soon as that many signed up 
-   (-> port/c results/c)]))
+   (->i ([p port/c]) ([players any/c]) (r results/c))]))
 
 ;                                                                                      
 ;       ;                                  ;                                           
@@ -98,14 +96,15 @@
 ;; -- if there are min players, return those and shut down
 ;; -- otherwise return false, requesting an extension
 
-(define (server port)
+(define (server port [house-players '()])
   (define send-players (make-channel))
   (define custodian    (make-custodian))
   (define th
     (parameterize ([current-custodian custodian])
-      (thread (sign-up-players port send-players))))
+      (thread (sign-up-players port send-players house-players))))
   (define players (wait-for-players send-players))
-  (log-info "~a players are playing a tournament" (length players))
+  (fprintf (current-error-port) "~a players are playing a tournament:\n " (length players))
+  (displayln players (current-error-port))
   (begin0
     (cond
       [(empty? players) (displayln MIN-ERROR (current-error-port)) DEFAULT-RESULT]
@@ -125,10 +124,10 @@
          [(channel-get send-players) => reverse]
          [else (loop (- n 1))])])))
 
-#; {Port Channel -> Void}
-(define [(sign-up-players port send-players)]
+#; {Port Channel [Listof Player] -> Void}
+(define [(sign-up-players port send-players house-players)]
   (define listener (tcp-listen port MAX-TCP REOPEN))
-  (let collect-players ([players '()])
+  (let collect-players ([players house-players])
     (cond
       [(= (length players) MAX-PLAYERS)
        (channel-put send-players players)]
