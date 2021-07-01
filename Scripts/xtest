@@ -1,0 +1,56 @@
+#! /bin/sh
+#| -*- racket -*-
+exec racket -tm "$0" -- ${1+"$@"}
+|#
+#lang racket
+
+;; usage:
+;; ./xtest --file path-to-file.json --player path-to-player 
+;;
+;; The file is used to configure the `server`, the `manager`, and the `referee`.
+;;
+;; The `server` consumes two of the parameters inn `path-to-file.json`:
+;; -- the port number on which to play
+;; -- the number of players with which to start a tournament
+;; It also uses the `path-to-player`. 
+;;
+;; The server must pass along options to the tournament `manager`.
+;; HOW ~~ This may deserve a re-design.
+
+(provide main)
+
+;; ---------------------------------------------------------------------------------------------------
+(require Fish/Scripts/Private/run-server-client)
+(require Fish/Player/player)
+(require Fish/Player/greedy)
+
+(require SwDev/Testing/harness)
+(require SwDev/Testing/communication)
+
+;; ---------------------------------------------------------------------------------------------------
+
+(define PORT 40000)
+(define TIME (+ (+ 30 30) 60))
+
+(define (main path-to-remote)
+  (define players# 4)
+  (define players (build-list players# (λ _ (new player% [strategy (new strategy%)]))))
+  (define-values (s-in _1 tear-down-server) (local-setup (λ () (run-server PORT #:house players))))
+  (define-values (r-in _2 tear-down-remote) [(make-setup path-to-remote (list (~a PORT)) values)])
+  
+  (parameterize ((io-time-out TIME))
+    (define remote-output (port->list read-line r-in))
+    (displayln `[the remote player wrote])
+    (for-each displayln remote-output)
+
+    (displayln `[the result produced by the server ,(read-message s-in)]))
+  
+  (tear-down-server)
+  (tear-down-remote))
+
+;; TODO:
+;; -- design a new configure function that parses more arguments
+;; OR
+;; -- implement a hash-table initialization scheme
+
+

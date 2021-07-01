@@ -1,0 +1,28 @@
+#! /bin/sh
+#| -*- racket -*-
+exec racket -tm "$0" -- ${1+"$@"}
+|#
+#lang racket
+
+;; ./xclients n:natural? p:listen-port-no?
+;; points n remote greedy players to port p 
+
+(provide main)
+
+;; ---------------------------------------------------------------------------------------------------
+(require Fish/Player/greedy)
+(require Fish/Scripts/Private/run-server-client)
+(require Fish/Scripts/Private/player)
+
+;; ---------------------------------------------------------------------------------------------------
+(define (main p-str [ip LOCALHOST])
+
+  (displayln `[x1client running ,p-str])
+
+
+  (define player (list (new player% [strategy (new strategy%)])))
+  (define p (string->number p-str))
+  (unless (and p (listen-port-number? p))
+    (error 'xclient "port number expected, given ~e" p-str))
+  (displayln `[pointing one player at ,ip on port ,p])
+  (run-clients p player ip))
