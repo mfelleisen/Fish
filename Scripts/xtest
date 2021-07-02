@@ -5,21 +5,28 @@ exec racket -tm "$0" -- ${1+"$@"}
 #lang racket
 
 ;; usage:
-;; ./xtest --file path-to-file.json --player path-to-player 
+;; ./xtest path-to-player --file path-to-file.json
+;; or
+;; ./xtest path-to-player players = P rows = R ... 
 ;;
-;; The file is used to configure the `server`, the `manager`, and the `referee`.
-;;
-;; The `server` consumes two of the parameters inn `path-to-file.json`:
-;; -- the port number on which to play
-;; -- the number of players with which to start a tournament
-;; It also uses the `path-to-player`. 
-;;
+;; The file is used to configure the `server` to set up some number P of (internal) house players
+;; that then compete against the specified external player
+;; running on the same machine but communicating via TCP.
+;; The script forwards the rmeote player's STDOUT but only for up to 3s after the tournament is over.
+
+;; EXAMPLE:
+;;   ./xtest ./x1client --file config-n.json
+;; This sets up four house players and starts `x1client PORT` as an external process.
+;; `x1client` sets up a player that displays each (remote) method call to STDOUT
+
+
 ;; The server must pass along options to the tournament `manager`.
 ;; HOW ~~ This may deserve a re-design.
 
 (provide main)
 
 ;; ---------------------------------------------------------------------------------------------------
+(require Fish/Scripts/Private/configure)
 (require Fish/Scripts/Private/run-server-client)
 (require Fish/Player/player)
 (require Fish/Player/greedy)
@@ -29,23 +36,33 @@ exec racket -tm "$0" -- ${1+"$@"}
 
 ;; ---------------------------------------------------------------------------------------------------
 
-(define PORT 40000)
-(define TIME (+ (+ 30 30) 60))
+(define TIME (+ (+ 30 30) 60)) ;; maximum wait time for tournament to end; should probably be inf
 
-(define (main path-to-remote)
-  (define players# 4)
-  (define players (build-list players# (λ _ (new player% [strategy (new strategy%)]))))
-  (define-values (s-in _1 tear-down-server) (local-setup (λ () (run-server PORT #:house players))))
-  (define-values (r-in _2 tear-down-remote) [(make-setup path-to-remote (list (~a PORT)) values)])
+(define (main path-to-remote . c)
+  (define h (configure-server c))
+  (define players# (dict-ref h 'players))
+  (define port (dict-ref h 'port))
   
-  (parameterize ((io-time-out TIME))
-    (define remote-output (port->list read-line r-in))
-    (displayln `[the remote player wrote])
-    (for-each displayln remote-output)
+  (define players (build-list players# (λ _ (new player% [strategy (new strategy%)]))))
+  (define-values (s-in _1 tear-down-server) (local-setup (λ () (run-server port #:house players))))
+  (define-values (r-in _2 tear-down-remote) [(make-setup path-to-remote (list (~a port)) values)])
 
+  (define th
+    (thread
+     (λ ()
+       (let loop ()
+         (define next (read-line r-in))
+         (unless (eof-object? next)
+           (displayln next)
+           (loop))))))
+
+  ;; after the tournament is run: 
+  (parameterize ((io-time-out TIME))
     (displayln `[the result produced by the server ,(read-message s-in)]))
   
   (tear-down-server)
+
+  (sync/timeout 3 th)
   (tear-down-remote))
 
 ;; TODO:

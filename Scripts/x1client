@@ -4,8 +4,8 @@ exec racket -tm "$0" -- ${1+"$@"}
 |#
 #lang racket
 
-;; ./xclients n:natural? p:listen-port-no?
-;; points n remote greedy players to port p 
+;; ./x1client p:listen-port-no?
+;; points one remote greedy player to a server on port p 
 
 (provide main)
 
@@ -16,10 +16,6 @@ exec racket -tm "$0" -- ${1+"$@"}
 
 ;; ---------------------------------------------------------------------------------------------------
 (define (main p-str [ip LOCALHOST])
-
-  (displayln `[x1client running ,p-str])
-
-
   (define player (list (new player% [strategy (new strategy%)])))
   (define p (string->number p-str))
   (unless (and p (listen-port-number? p))
