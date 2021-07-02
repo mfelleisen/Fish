@@ -28,7 +28,7 @@ exec racket -tm "$0" -- ${1+"$@"}
 
 ;; ---------------------------------------------------------------------------------------------------
 (define (main . n)
-  (define-values (players names make-state) (configure n))
+  (define-values (players names make-state) (configure-game n))
   (define state0 (make-state players))
   (match-define (list rankings failures) (referee state0 #:time-out 3 #:observers (list observer)))
   (report-results names players rankings failures))
