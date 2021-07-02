@@ -19,12 +19,9 @@
 ;                                                                  
 ;                                                                  
 
-(require (prefix-in base: Fish/Player/player))
 (require Fish/Common/player-interface)
 
-(provide
- (contract-out
-  [player% player%/c]))
+(provide (contract-out [player% player%/c]))
   
 
 ;                                                                                      
@@ -43,7 +40,7 @@
 ;                 ;                                                                    
 
 
-(require Fish/Player/player)
+(require (prefix-in base: Fish/Player/player))
 
 ;                              
 ;   ;                          
@@ -73,7 +70,9 @@
     (define/logging (initial state))
     [define/logging (take-turn state actions-since-last-turn)]
     (define/logging (start-of-tournament nicknames))
-    [define/logging (end-of-tournament results)]
+    [define/override (end-of-tournament result)
+      (displayln `[the logging player ,(if result "won" "lost")])]
+      
     
     (super-new)))
 
