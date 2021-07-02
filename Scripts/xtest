@@ -15,13 +15,13 @@ exec racket -tm "$0" -- ${1+"$@"}
 ;; The script forwards the rmeote player's STDOUT but only for up to 3s after the tournament is over.
 
 ;; EXAMPLE:
-;;   ./xtest ./x1client --file config-n.json
+;;   ./xtest ./x1client --file players = 4
 ;; This sets up four house players and starts `x1client PORT` as an external process.
-;; `x1client` sets up a player that displays each (remote) method call to STDOUT
+;; `x1client` sets up a player that displays each (remote) method call to STDOUT.
 
-
-;; The server must pass along options to the tournament `manager`.
-;; HOW ~~ This may deserve a re-design.
+;; TODO:
+;; -- the script must pass along options to the tournament `manager`.
+;; -- include the specification for an internal observer
 
 (provide main)
 
@@ -64,10 +64,3 @@ exec racket -tm "$0" -- ${1+"$@"}
 
   (sync/timeout 3 th)
   (tear-down-remote))
-
-;; TODO:
-;; -- design a new configure function that parses more arguments
-;; OR
-;; -- implement a hash-table initialization scheme
-
-

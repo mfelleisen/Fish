@@ -1,26 +1,34 @@
 #lang scribble/manual
 
 @(require "shared.rkt")
+@(require Fish/scribblings/overview)
 @[define hey-fish-url "https://boardgamegeek.com/boardgame/8203/hey-s-my-fish"]
+
+@; -----------------------------------------------------------------------------
 
 @title[#:tag "Fish Project"]{The Fish Competition}
 
 @author{Matthias Felleisen}
 
-@link[hey-fish-url]{Hey, that's my fish} (Bambus Spielverlag)
-is a board game for players eight and older. It has won several awards and nominations, including the
-@emph{Lucca Games Best Family Game} nominee.
+@link[hey-fish-url]{Hey, that's my fish} (Bambus Spielverlag) is a board game
+for players eight and older. It has won several awards and nominations,
+including @emph{Lucca Games Best Family Game} nomination.
 
-This repository is a framework for programming competitive @emph{Fish} players, a variant of ``Hey, that's
-my fish.'' Participants will design automated players that run on their desktops and connect to a
-(remote) @emph{Fish} server. This server will run "knock out" tournaments of games consisting of two to
-four players each. Any misbehavior of a player---non-responsiveness due to bugs or cheating---results
-in immediate termination. So the competition is not just about writing great strategies but also
-delivering robust code.
+This repository is a framework for programming @emph{Fish} competitions,
+specifically software players, that compete in single-game, knock-out
+tournaments. The game is a variant of ``Hey, that's my fish;'' use the
+human-player graphical interface to get to know it. 
 
-@(require Fish/scribblings/overview)
+Participants design automated players that run on their desktops and connect to
+a (remote) @emph{Fish} server. This server will run "knock out" tournaments of
+games consisting of two to four players each. Any misbehavior of a
+player---non-responsiveness due to bugs or cheating---results in immediate
+termination. So the competition is not just about writing great strategies but
+also delivering robust code.
 
+@; ---------------------------------
 @centerline[(overview 0.9)]
+@; ---------------------------------
 
 @bold{The Basic Idea}
 
@@ -71,7 +79,10 @@ manager. It starts with a section on how to navigate the modules in
 
 @include-section{idea.scrbl}
 @include-section{strategy.scrbl}
+@include-section{player.scrbl}
+@include-section{tournaments.scrbl}
+
 @include-section{ontology.scrbl}
 @include-section{protocol.scrbl}
 @include-section{remote.scrbl}
-@include-section{player.scrbl}
+
