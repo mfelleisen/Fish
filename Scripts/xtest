@@ -7,20 +7,24 @@ exec racket -tm "$0" -- ${1+"$@"}
 ;; usage:
 ;; ./xtest path-to-player --file path-to-file.json
 ;; or
-;; ./xtest path-to-player players = P rows = R ... 
-;;
-;; The file is used to configure the `server` to set up some number P of (internal) house players
-;; that then compete against the specified external player
-;; running on the same machine but communicating via TCP.
-;; The script forwards the rmeote player's STDOUT but only for up to 3s after the tournament is over.
+;; ./xtest path-to-player players = P rows = R ...
+;; 
+;; CONSTRAINTS
+;; `path-to-player` is expected to consume the port as the first command-line argument. 
+;; The configuration must include the number of house players P that compete against `path-to-player`.
+
+;; Configures the `server` to set up some number P of (internal) house players that compete
+;; against the specified external player `path-to-player` running on the same machine but
+;; communicating via TCP with the `server`.
+;; 
+;; The script forwards the remote player's STDOUT but only for up to 3s after the tournament is over.
 
 ;; EXAMPLE:
-;;   ./xtest ./x1client --file players = 4
-;; This sets up four house players and starts `x1client PORT` as an external process.
-;; `x1client` sets up a player that displays each (remote) method call to STDOUT.
+;;   ./xtest ./x1client players = 4
+;; This sets up four house players and starts `x1client port` as an external process.
+;; `x1client` sets up a standard, greedy player that displays each (remote) method call to STDOUT.
 
 ;; TODO:
-;; -- the script must pass along options to the tournament `manager`.
 ;; -- include the specification for an internal observer
 
 (provide main)
@@ -38,14 +42,11 @@ exec racket -tm "$0" -- ${1+"$@"}
 
 (define TIME (+ (+ 30 30) 60)) ;; maximum wait time for tournament to end; should probably be inf
 
-(define (main path-to-remote . c)
+(define (main path-to . c)
   (define h (configure-server c))
-  (define players# (dict-ref h 'players))
-  (define port (dict-ref h 'port))
-  
-  (define players (build-list players# (λ _ (new player% [strategy (new strategy%)]))))
-  (define-values (s-in _1 tear-down-server) (local-setup (λ () (run-server port #:house players))))
-  (define-values (r-in _2 tear-down-remote) [(make-setup path-to-remote (list (~a port)) values)])
+  (define players (build-list (dict-ref h 'players) (λ _ (new player% [strategy (new strategy%)]))))
+  (define-values (s-in _1 tear-down-server) (local-setup (λ () (run-server h #:house players))))
+  (define-values (r-in _2 tear-down-remote) [(make-setup path-to `(,(~a (dict-ref h 'port))) values)])
 
   (define th
     (thread

@@ -35,10 +35,8 @@
 (define PORT-STARTER-FILE "port-starter-file.rktl")
 
 ;; ---------------------------------------------------------------------------------------------------
-(define (run-server p #:house (house-players '[]))
-  (unless (port/c p)
-    (error 'xserver "port number expected, given ~e" p))
-  (match-define [list winners cheats-and-failures] (server p house-players))
+(define (run-server config #:house (house-players '[]))
+  (match-define [list winners cheats-and-failures] (server config house-players))
   (send-message `[,(~a winners) ,(~a cheats-and-failures)]))
 
 ;; ---------------------------------------------------------------------------------------------------

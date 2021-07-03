@@ -150,6 +150,16 @@
       [(hash-ref h k #false) => (λ (in-h) (checker in-h) h)]
       [else (hash-set h k default-value)])))
 
+#; {ImmutableHash [Listof (Cons X Y)] -> ImmutableHash}
+(define (extend-immutable-hash h0 lox)
+  (for/fold ([h h0]) ([x lox])
+    (match-define (cons k v) x)
+    (when (hash-ref h k #false)
+      (error 'extend-immutable-hash "key ~a already exists" k))
+    (hash-set h k v)))
+
+
+
 ;                                                          
 ;       ;            ;;                                    
 ;       ;           ;                  ;;;      ;          
@@ -171,29 +181,36 @@
 (define ROWS    6)
 (define COLS    6)
 (define FISH    #false)
+(define TIME-PER-TURN 10.)
+
+(define MAX-TIME    30)
+(define MIN-PLAYERS  5)
+(define MAX-PLAYERS 10)
+(define MAX-TRIES    1)
+
 
 #; {N N FormatString -> X -> N}
 (define ((check-xyz low high err) w)
   (unless (or (and (natural? w) (<= low w high)) (boolean? w))
-    (error 'configure err w))
+    (error 'configure (string-append err "expected , given ~e") w))
   w)
 
-(define game-defaults 
-  (make-immutable-hasheq
-   `[[rows . [,ROWS ,(check-xyz 2 9 "number of rows expected, given ~e")]]
-     [cols . [,COLS ,(check-xyz 2 9 "number of columns expected, given ~e")]]
-     [fish . [,FISH ,(check-xyz 1 5 "number of fish per tile expected, given ~e")]]
-     [players . [,PLAYER# ,(or/c (listof any/c) (check-xyz 2 4 "players expected, given ~e"))]]]))
+(define game-defaults
+  (make-immutable-hash
+   `[[time-per-turn . [,TIME-PER-TURN ,(check-xyz 1 60 "seconds (per turn time)")]]
+     [rows . [,ROWS ,(check-xyz 2 9 "number of rows")]]
+     [cols . [,COLS ,(check-xyz 2 9 "number of columns")]]
+     [fish . [,FISH ,(check-xyz 1 5 "number of fish per tile")]]
+     [players . [,PLAYER# ,(or/c (listof any/c) (check-xyz 2 100 "players"))]]]))
 
 (define tournament-defaults
-  (make-immutable-hash
-   `[[port . [,PORT ,(check-xyz 10000 65000 "port expected, given ~e")]]
-     [rows . [,ROWS ,(check-xyz 2 9 "number of rows expected, given ~e")]]
-     [cols . [,COLS ,(check-xyz 2 9 "number of columns expected, given ~e")]]
-     [fish . [,FISH ,(check-xyz 1 5 "number of fish per tile expected, given ~e")]]
-     [players . [,PLAYER# ,(or/c (listof any/c) (check-xyz 2 100 "players expected, given ~e"))]]]))
+  (extend-immutable-hash
+   game-defaults
+   `[[port . [,PORT ,(check-xyz 10000 65000 "port")]]
+     [server-wait . [,MAX-TIME ,(check-xyz 10 MAX-TIME "seconds (server wait time)")]]
+     [t-players . [,MIN-PLAYERS ,(check-xyz MIN-PLAYERS MAX-PLAYERS "number of tournameny players")]]
+     [server-tries . [,MAX-TRIES ,(check-xyz 1 10 "times (server wait periods)")]]]))
 
-  
 ;; ---------------------------------------------------------------------------------------------------
 (module+ test
   (check-equal? (to-hash "players = 3") (make-immutable-hasheq '[[players . 3]]))

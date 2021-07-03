@@ -20,11 +20,26 @@
 ;                                                                  
 
 (require (only-in Fish/Admin/manager results/c))
+(require Fish/Lib/hash-contract)
 
 (define port/c (and/c natural-number/c (</c 60000) (>/c 10000)))
 (define player#/c natural-number/c)
 
+(define PORT 'port)
+(define SERVER-TRIES 'server-tries)
+(define SERVER-WAIT 'server-wait)
+(define T-PLAYERS 't-players)
+(define TIME-PER-TURN 'time-per-turn)
+(define FISH 'fish)
+(define ROWS 'rows)
+(define COLS 'cols)
+
+(define server-options (list PORT SERVER-TRIES SERVER-WAIT T-PLAYERS TIME-PER-TURN FISH ROWS COLS))
+
 (provide
+ ;; server options 
+ PORT SERVER-TRIES SERVER-WAIT T-PLAYERS TIME-PER-TURN FISH ROWS COLS
+
  (contract-out
   [server
    #; (server player#/c wait-for-sec port#)
@@ -32,7 +47,7 @@
    ;; runsning an manager on the players that connected on port# in time
    ;; plus the house players (if any) 
    ;; wait-for-sec seconds or N >= player# as soon as that many signed up 
-   (->i ([config (hash/c symbol? any/c)]) ([players any/c] )
+   (->i ([config (hash-carrier/c server-options)]) ([players any/c] )
         (r results/c))]))
 
 ;                                                                                      
@@ -97,11 +112,11 @@
 ;; -- otherwise return false, requesting an extension
 
 (define (server config [house-players '()])
-  (define port (dict-ref config 'port))
-  (define MAX-TIME    (dict-ref config 'server-wait))
-  (define MIN-PLAYERS (dict-ref config 't-players))
-  (define MAX-PLAYERS (dict-ref config 't-players)) ;; BUG: need to accommodate max and min 
-  (define MAX-TRIES   (dict-ref config 'server-tries))
+  (define port (dict-ref config PORT))
+  (define MAX-TIME    (dict-ref config SERVER-WAIT))
+  (define MIN-PLAYERS (dict-ref config T-PLAYERS))
+  (define MAX-PLAYERS (dict-ref config T-PLAYERS)) ;; BUG: need to accommodate max and min 
+  (define MAX-TRIES   (dict-ref config SERVER-TRIES))
 
   ;; set up custodian so `server` can clean up all threads, TCP ports in case it is re-used
   (parameterize ([current-custodian (make-custodian)])
@@ -115,10 +130,10 @@
 
 #; {[Listof Player] ImmutableHash -> [List [Listof Player] [Listof Player]]}
 (define (configure-manager players config)
-  (define game-time-out (dict-ref config 'time-per-turn))
-  (define fish#         (dict-ref config 'fish))
-  (define row#          (dict-ref config 'rows))
-  (define col#          (dict-ref config 'cols))
+  (define game-time-out (dict-ref config TIME-PER-TURN))
+  (define fish#         (dict-ref config FISH))
+  (define row#          (dict-ref config ROWS))
+  (define col#          (dict-ref config COLS))
   (manager players #:time-out game-time-out #:fixed fish# #:size (list row# col#)))
 
 #;{Port# [Listof Player] Int Int Int -> [Listof Player]}
@@ -217,8 +232,8 @@
                    [current-error-port err-out])
       (define config2
         (let* ([config config]
-               [config (hash-set config 'port port)]
-               [config (if k (hash-set config 't-players k) config)])
+               [config (hash-set config PORT port)]
+               [config (if k (hash-set config T-PLAYERS k) config)])
           config))
       (define th (thread (λ () (server config2))))
       (sleep 1)
@@ -254,17 +269,17 @@
 (module+ test
 
   (define PLRS '["a" "b" "c" "d" "e1" "failed attempt at Name" "e"])
-  (define PORT 45674)
+  (define PORT# 45674)
   (parameterize ([current-custodian (make-custodian)])
     (define players  (build-list (length PLRS) (λ _ (new player% [strategy (new greedy-strategy)]))))
     (define named    (map list PLRS players))
     (define o*       (open-output-string))
     (define config3
       (let* ([config config]
-             [config (hash-set config 'port PORT)]
-             [config (hash-set config 't-players (- (length PLRS) 2))]) ;; bad players drop out 
+             [config (hash-set config PORT PORT#)]
+             [config (hash-set config T-PLAYERS (- (length PLRS) 2))]) ;; bad players drop out 
         config))
-    (define customer (thread (λ () (parameterize ([current-error-port o*]) (client named PORT)))))
+    (define customer (thread (λ () (parameterize ([current-error-port o*]) (client named PORT#)))))
     (match-define [list winners cheaters] (parameterize ([current-error-port o*]) (server config3)))
     (sync customer)
     (begin0 (check-true (empty? (rest winners)))

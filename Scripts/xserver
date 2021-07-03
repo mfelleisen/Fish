@@ -10,9 +10,10 @@ exec racket -W error -tm "$0" -- ${1+"$@"}
 
 ;; ---------------------------------------------------------------------------------------------------
 (require Fish/Scripts/Private/run-server-client)
+(require Fish/Scripts/Private/configure)
 
 ;; ---------------------------------------------------------------------------------------------------
 (define (main p-str)
-  (define p (string->number p-str))
-  (displayln `[starting a server on ,p])
+  (define p (configure-server (list (~a "port = " p-str))))
+  (pretty-print `[starting a server on ,p])
   (run-server p))
