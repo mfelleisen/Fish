@@ -158,7 +158,7 @@
 
   (define-syntax (texn stx)
     (syntax-parse stx 
-      [(test (method args ...) (~optional (~seq #:remote input) #:defaults ([input #'(~a "void")])))
+      [(_ msg (method args ...) (~optional (~seq #:remote input) #:defaults ([input #'(~a "void")])))
        #'(check-exn
           exn:misc:match?
           (λ ()
@@ -169,7 +169,8 @@
                     (define ip (current-input-port))
                     (define op (current-output-port))
                     (define r1 (new remote-player% [in ip] [out op]))
-                    (send r1 method args ...)))))))]))
+                    (send r1 method args ...))))))
+          msg)]))
   
   (test (start-of-tournament #t)        #:msg '["start" [#t]])
   (test (playing-as "brown")            #:msg '["playing-as" ["brown"]])
@@ -183,5 +184,5 @@
   (test [take-turn s1 '[]] #:remote a1  #:exp a1 #:msg `["take-turn" [,j1 []]])
 
   ;; --- make sure the return-values are well-formated JSON 
-  (texn [take-turn s1 '[]] #:remote '[[1 1]])
-  (texn [take-turn s1 '[]] #:remote "[[1 1"))
+  (texn "take turn [[1 1]]" [take-turn s1 '[]] #:remote '[[1 1]])
+  (texn "take turn [[1 1"   [take-turn s1 '[]] #:remote "[[1 1"))
