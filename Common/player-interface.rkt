@@ -238,5 +238,5 @@
   
   (define (jsexpr->action s)
     (match s
-      [(? string?) (string->symbol s)]
+      [(? (and/c string? (λ (x) (not (regexp-match #px"ERROR" x))))) (string->symbol s)]
       [(action row0 col0 row1 col1) s])))
