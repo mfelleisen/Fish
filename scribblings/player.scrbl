@@ -56,20 +56,24 @@ or
 ./xtest path-to-player players = P rows = R ... 
 }
 @;
-The script configures the `server`, sets up some number P of (internal) house
-players, signs up the external player, and then runs a tournament with those
-five players. 
+Both kinds of configurations must specify a @tt{"players"} attribute.
 
-The external remote player runs on the same machine but communicates via TC. The
-script forwards the rmeote player's @tt{STDOUT} but only for up to 3s after the
-tournament is over.
+The @tt{xtest} script configures the server, sets up some number P of
+(internal) house players, spawns a separate subprocess using
+@tt{path-to-player} as an external player, and then runs a tournament
+with those five players.
 
-The script forwards STDOUT from the remote player and the server. 
+The @tt{path-to-player} program receives a TCP port number as the
+first argument on the command line; it is expected to communicate with
+the server on this port via TCP.
 
-The @tt{./x1client} script is a simplistic remote player for testing purposes.
-It is derived from the ``house players'' and displays each remote call to
-STDOUT. It is implemented in Racket but that is not necessary. Sample
-submissions for other languages accepted. 
+The @tt{xtest} script forwards @tt{STDOUT} from the remote player and
+the server.
+
+The @tt{x1client} script is a simplistic remote player for testing
+purposes.  It is derived from the ``house players'' and displays each
+remote call to STDOUT. Sample submissions for other languages are
+happily accepted.
 
 Here is what a sample run with these scripts looks like: 
 @verbatim[#:indent 4]{
@@ -107,3 +111,4 @@ all done
 @;
 Notice how the result from the server may show up in the middle of the lines
 from the logging player. 
+
