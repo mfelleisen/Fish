@@ -11,7 +11,7 @@ exec racket -tm "$0" -- ${1+"$@"}
 ;; 
 ;; ./xplay fish = F players = P rows = R columns = C
 ;; for F, P, R, C and D in Naturals
-;; The command line may specify these parameters in any order, abd every field is optional.
+;; The command line may specify these parameters in any order, and every field is optional.
 ;; 
 ;; The number of players must be less than 4 so the script can add a human. 
 ;; 

@@ -4,10 +4,13 @@
 
  #; {[Listof String] -> [ImmutableHash 'port 'players]}
  configure-server
+ ;; creates a configuration table for both the xserver and xtest
+ ;; the defaults are specified below as `tournament-defaults`
+ ;; the user can override them with commandline arguments xor a JSON config file 
 
  #; {[Listof String] -> (values [Listof Player] [Listof String] [ [Listof Player] -> State])}
  ;; creates a list of players, their names, and a function that maps players to an initial game state 
- ;; the defaults are specified below 
+ ;; the defaults are specified below as `game-defaults`
  ;; the user can override them with commandline arguments xor a JSON config file 
  configure-game)
 
