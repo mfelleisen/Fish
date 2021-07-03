@@ -29,9 +29,11 @@
   [server
    #; (server player#/c wait-for-sec port#)
    ;; returns the list of winners and cheaters/failures 
-   ;; runsning an manager on the N players that connected on port# in
+   ;; runsning an manager on the players that connected on port# in time
+   ;; plus the house players (if any) 
    ;; wait-for-sec seconds or N >= player# as soon as that many signed up 
-   (->i ([p port/c]) ([players any/c]) (r results/c))]))
+   (->i ([config (hash/c symbol? any/c)]) ([players any/c] )
+        (r results/c))]))
 
 ;                                                                                      
 ;       ;                                  ;                                           
@@ -49,7 +51,6 @@
 ;                 ;                                                                    
 
 (require Fish/Remote/player)
-(require Fish/Remote/basic-constants)
 (require (except-in Fish/Admin/manager results/c))
 
 (require SwDev/Testing/communication)
@@ -80,10 +81,9 @@
 (define MAX-TCP   30)
 (define REOPEN    #t)
 (define DEFAULT-RESULT '[[] []])
-(define TIME-PER-CALL 10.)
 
 (define test-run?  (make-parameter #false))
-(define MIN-ERROR  (~a "server did not sign up enough (" MIN-PLAYERS ") players"))
+(define MIN-ERROR  "server did not sign up enough ~a players")
 
 ;; get at least min players, at most max players
 ;; wait for at most 30s
@@ -96,36 +96,47 @@
 ;; -- if there are min players, return those and shut down
 ;; -- otherwise return false, requesting an extension
 
-(define (server port [house-players '()])
-  (define send-players (make-channel))
-  (define custodian    (make-custodian))
-  (define th
-    (parameterize ([current-custodian custodian])
-      (thread (sign-up-players port send-players house-players))))
-  (define players (wait-for-players send-players))
-  (fprintf (current-error-port) "~a players are playing a tournament:\n " (length players))
-  (displayln players (current-error-port))
-  (begin0
-    (cond
-      [(empty? players) (displayln MIN-ERROR (current-error-port)) DEFAULT-RESULT]
-      [(test-run?) => (λ (result) (channel-put result players) DEFAULT-RESULT)]
-      [else (manager players #:fixed 2 #:time-out TIME-PER-CALL)])
-    (custodian-shutdown-all custodian)))
+(define (server config [house-players '()])
+  (define port (dict-ref config 'port))
+  (define MAX-TIME    (dict-ref config 'server-wait))
+  (define MIN-PLAYERS (dict-ref config 't-players))
+  (define MAX-PLAYERS (dict-ref config 't-players)) ;; BUG: need to accommodate max and min 
+  (define MAX-TRIES   (dict-ref config 'server-tries))
 
-#;{Channel Thread -> [Listof Player]}
-(define (wait-for-players send-players)
+  ;; set up custodian so `server` can clean up all threads, TCP ports in case it is re-used
+  (parameterize ([current-custodian (make-custodian)])
+    (define players (wait-for-players port house-players MAX-TRIES MAX-TIME MIN-PLAYERS MAX-PLAYERS))
+    (begin0 
+      (cond
+        [(empty? players) (fprintf (current-error-port) MIN-ERROR MIN-PLAYERS) DEFAULT-RESULT]
+        [(test-run?) => (λ (result) (channel-put result players) DEFAULT-RESULT)]
+        [else (configure-manager players config)])
+      (custodian-shutdown-all (current-custodian)))))
+
+#; {[Listof Player] ImmutableHash -> [List [Listof Player] [Listof Player]]}
+(define (configure-manager players config)
+  (define game-time-out (dict-ref config 'time-per-turn))
+  (define fish#         (dict-ref config 'fish))
+  (define row#          (dict-ref config 'rows))
+  (define col#          (dict-ref config 'cols))
+  (manager players #:time-out game-time-out #:fixed fish# #:size (list row# col#)))
+
+#;{Port# [Listof Player] Int Int Int -> [Listof Player]}
+(define (wait-for-players port house-players MAX-TRIES MAX-TIME MIN-PLAYERS MAX-PLAYERS)
+  (define communicate-with-sign-up (make-channel))
+  (thread (sign-up-players port communicate-with-sign-up house-players MIN-PLAYERS MAX-PLAYERS))
   (let loop ([n MAX-TRIES])
     (cond
       [(zero? n) '()]
-      [(sync/timeout MAX-TIME send-players) => reverse]
+      [(sync/timeout MAX-TIME communicate-with-sign-up) => reverse]
       [else
-       (channel-put send-players (~a "are there at least " MIN-PLAYERS " signed up"))
+       (channel-put communicate-with-sign-up (~a "are there at least " MIN-PLAYERS " signed up"))
        (cond
-         [(channel-get send-players) => reverse]
+         [(channel-get communicate-with-sign-up) => reverse]
          [else (loop (- n 1))])])))
 
-#; {Port Channel [Listof Player] -> Void}
-(define [(sign-up-players port send-players house-players)]
+#; {Port Channel [Listof Player] Int Int -> Void}
+(define [(sign-up-players port send-players house-players MIN-PLAYERS MAX-PLAYERS)]
   (define listener (tcp-listen port MAX-TCP REOPEN))
   (let collect-players ([players house-players])
     (cond
@@ -133,14 +144,14 @@
        (channel-put send-players players)]
       [else
        (sync
-        (handle-evt listener (λ (_) (collect-players (add-player players listener))))
-        (handle-evt send-players (stop-or-resume collect-players send-players players)))])))
-
-#; {[[Listof Player] -> Void] Channel [Listof Player] -> Void}
-(define ((stop-or-resume collect-players send-players players) _)
-  (cond
-    [(>= (length players) MIN-PLAYERS) (channel-put send-players players)]
-    [else (channel-put send-players #false) (collect-players players)]))
+        (handle-evt listener
+                    (λ (_)
+                      (collect-players (add-player players listener))))
+        (handle-evt send-players
+                    (λ (_)
+                      (cond
+                        [(>= (length players) MIN-PLAYERS) (channel-put send-players players)]
+                        [else (channel-put send-players #false) (collect-players players)]))))])))
 
 #; (TCP-Listener [Listof Player] -> [Listof Player])
 (define (add-player players listener)
@@ -153,7 +164,7 @@
        (cons next players)]
       [else
        (define m [if (and (string? name) (regexp-match #px"Timed" name)) "name" "not a short string"])
-       (log-error (~a "failed to send " m))
+       (displayln (~a "failed to send " m) (current-error-port))
        (close-input-port in)
        (close-output-port out)
        players])))
@@ -181,6 +192,19 @@
 
 (module+ test ;; timing
 
+  (define config 
+    (make-immutable-hash
+     `[[port . 45670]
+       [server-wait . 40]
+       [t-players . 5]
+       [server-tries . 1]
+       [time-per-turn . 10]
+       [rows . 5]
+       [cols . 5]
+       [fish . 2]
+       [players . 4]]))
+
+
   #; { N Port-Number (U False n:N) -> (U False [Listof 0]: (=/c (length) n))}
   #; (run-server-test m p k)
   ;; runs the server on port p, waitig for m players, but receiving k
@@ -191,7 +215,12 @@
     (parameterize ([test-run?          result]
                    [current-custodian  custodian]
                    [current-error-port err-out])
-      (define th (thread (λ () (server port))))
+      (define config2
+        (let* ([config config]
+               [config (hash-set config 'port port)]
+               [config (if k (hash-set config 't-players k) config)])
+          config))
+      (define th (thread (λ () (server config2))))
       (sleep 1)
       (if (boolean? k)
           (sync th)
@@ -201,10 +230,10 @@
     (begin0
       (if k (channel-get result) (get-output-string err-out))
       (custodian-shutdown-all custodian)))
-  
-  (check-equal? (run-server-test 45678 #f) (string-append MIN-ERROR "\n") "no sign ups")
-  (check-equal? (run-server-test 45679 10) (build-list 10 add1) "sign up enough players")
-  (check-equal? (run-server-test 45679  9) (build-list  9 add1) "sign up too few players"))
+
+  (check-equal? (run-server-test 45671 #f) (format MIN-ERROR 5) "no sign ups")
+  (check-equal? (run-server-test 45677 10) (build-list 10 add1) "sign up enough players")
+  (check-equal? (run-server-test 45676 9) (build-list  9 add1) "sign up too few players"))
 
 ;                                                                 
 ;      ;;                                                         
@@ -225,14 +254,19 @@
 (module+ test
 
   (define PLRS '["a" "b" "c" "d" "e1" "failed attempt at Name" "e"])
-  (define PORT 45678)
+  (define PORT 45674)
   (parameterize ([current-custodian (make-custodian)])
     (define players  (build-list (length PLRS) (λ _ (new player% [strategy (new greedy-strategy)]))))
     (define named    (map list PLRS players))
     (define o*       (open-output-string))
-    (define customer (thread (λ () (parameterize ([current-output-port o*]) (client named)))))
-    (match-define [list winners cheats-and-failures] (server PORT))
+    (define config3
+      (let* ([config config]
+             [config (hash-set config 'port PORT)]
+             [config (hash-set config 't-players (- (length PLRS) 2))]) ;; bad players drop out 
+        config))
+    (define customer (thread (λ () (parameterize ([current-error-port o*]) (client named PORT)))))
+    (match-define [list winners cheaters] (parameterize ([current-error-port o*]) (server config3)))
     (sync customer)
     (begin0 (check-true (empty? (rest winners)))
-            (check-true (empty? cheats-and-failures))
+            (check-true (empty? cheaters))
             (custodian-shutdown-all (current-custodian)))))
