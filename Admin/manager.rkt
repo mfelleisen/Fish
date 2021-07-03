@@ -33,7 +33,7 @@
   [manager
    ;; produces a list consisting of the tournament winners and failures/cheaters 
    (->i ([lop (and/c player*/c cons? distinct?)])
-        (#:fixed [f natural?]
+        (#:fixed [f (or/c #false natural?)]
          #:size (s (list/c natural? natural?))
          #:time-out (t-o positive?))
         (r results/c))]))
