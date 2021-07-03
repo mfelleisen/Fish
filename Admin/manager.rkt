@@ -32,7 +32,10 @@
   (results/c contract?)
   [manager
    ;; produces a list consisting of the tournament winners and failures/cheaters 
-   (->i ([lop (and/c player*/c cons? distinct?)]) (#:fixed [f natural?] #:time-out (t-o positive?))
+   (->i ([lop (and/c player*/c cons? distinct?)])
+        (#:fixed [f natural?]
+         #:size (s (list/c natural? natural?))
+         #:time-out (t-o positive?))
         (r results/c))]))
 
 (module+ examples
