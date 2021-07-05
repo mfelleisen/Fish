@@ -1,5 +1,7 @@
 ## The Common Ontology
 
+the common ontology: understanding the communication between game server and client player
+
 The [`Common`](Common/) directory contains the materials that define
 the common ontology between external players and the server.
 

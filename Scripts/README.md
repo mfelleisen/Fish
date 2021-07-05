@@ -1,5 +1,7 @@
 ## The Scripts for RUnning Fish 
 
+scripts for observing games, playing games, testing remote players, and running tournaments
+
 ### Files and directories
 
 - `xobserve players = P` sets up an observable _game_ for `P` greedy players 
