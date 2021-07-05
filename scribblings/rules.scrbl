@@ -89,4 +89,7 @@ $ ./xplay --file config-n.json
 }
 @;
 
+For additional configuration options, see @tt{README} in @tt{Scripts/}.
+
 To terminate the program before the game is over, use @tt{ctrl-c} at the console. 
+

@@ -129,3 +129,4 @@ is used to display the progress of the game.  Here the greedy player won over
 the random player, which is explicitly programmed to be worse than greedy, if
 possible, and to make random choices. So the result meets the expectations.
 
+For additional configuration options, see @tt{README} in @tt{Scripts/}.

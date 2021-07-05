@@ -56,7 +56,7 @@ or
 ./xtest path-to-player players = P rows = R ... 
 }
 @;
-Both kinds of configurations must specify a @tt{"players"} attribute.
+Both kinds of configurations must specify a @tt{"players"} attribute. 
 
 The @tt{xtest} script configures the server, sets up some number P of
 (internal) house players, spawns a separate subprocess using
@@ -69,6 +69,8 @@ the server on this port via TCP.
 
 The @tt{xtest} script forwards @tt{STDOUT} from the remote player and
 the server.
+
+For additional configuration options, see @tt{README} in @tt{Scripts/}.
 
 The @tt{x1client} script is a simplistic remote player for testing
 purposes.  It is derived from the ``house players'' and displays each
