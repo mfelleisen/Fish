@@ -77,7 +77,7 @@ manager. It starts with a section on how to navigate the modules in
 
 @;table-of-contents[]
 
-@include-section{idea.scrbl}
+@include-section{rules.scrbl}
 @include-section{strategy.scrbl}
 @include-section{player.scrbl}
 @include-section{tournaments.scrbl}

@@ -186,10 +186,10 @@
 (define FISH    #false)
 (define TIME-PER-TURN 10.)
 
-(define MAX-TIME    30)
-(define MIN-PLAYERS  5)
-(define MAX-PLAYERS 10)
-(define MAX-TRIES    1)
+(define MAX-TIME     30)
+(define MIN-PLAYERS   5)
+(define MAX-PLAYERS 100)
+(define MAX-TRIES     3)
 
 
 #; {N N FormatString -> X -> N}
@@ -211,7 +211,7 @@
    game-defaults
    `[[port . [,PORT ,(check-xyz 10000 65000 "port")]]
      [server-wait . [,MAX-TIME ,(check-xyz 10 MAX-TIME "seconds (server wait time)")]]
-     [t-players . [,MIN-PLAYERS ,(check-xyz MIN-PLAYERS MAX-PLAYERS "number of tournameny players")]]
+     [t-players . [,MIN-PLAYERS ,(check-xyz MIN-PLAYERS MAX-PLAYERS "number of tournament players")]]
      [server-tries . [,MAX-TRIES ,(check-xyz 1 10 "times (server wait periods)")]]]))
 
 ;; ---------------------------------------------------------------------------------------------------

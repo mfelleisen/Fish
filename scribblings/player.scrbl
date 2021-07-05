@@ -5,8 +5,9 @@
 @; -----------------------------------------------------------------------------
 @title{@red{Player; How to Make One}}
 
-A @emph{remote player} is a program that connects to a game server running on
-some machine, possibly the same one, and then implements six kinds of functions:
+A @emph{remote player} is a program that connects to a game server via JSON over
+TCP. It may run on the same machine or some other machine. Besides a sign-up
+protocol, it must implement just six kinds of pieces of functionality:
 @;
 @itemlist[
 
@@ -40,9 +41,8 @@ be demoted to a ``loser.''
 barely related concerns: the game logic and the TCP communication. Separate
 those two. @bold{Hint} The game server uses a remote proxy pattern. 
 
-The last three sections describe the interaction protocol---its common ontology,
-its logic, and its TCP message formats---in detail. They include pointers into
-the code base for complete clarification on the logical aspects. 
+The last three sections describe the interaction protocol---@secref{sec:onto},
+@secref{sec:logic}, and @secref{sec:remote}---in detail. 
 
 @; -----------------------------------------------------------------------------
 @bold{How to Include a Remote Player in a Full Tournament}

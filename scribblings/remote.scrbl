@@ -24,7 +24,7 @@
    (build-path (getenv "HOME") "Hub" "Fish" "Common" (~a "remote-" file)))
 
 @; -----------------------------------------------------------------------------
-@title[#:tag "remote"]{@red{CO: Remote Interactions}}
+@title[#:tag "sec:remote"]{@red{CO: Remote Interactions}}
 
 A remote player connects to a server via TCP. It is the server's responsibility
 to collect connections to remote players, to represent them, and to hand them to
@@ -40,14 +40,14 @@ single place.
 @bold{Organization} The first diagram is about connecting to the server. The
 remaining ones specify how the logical interaction diagrams of
 @; KEEP ON ONE LINE 
-@secref{local protocol}
+@secref{sec:logic}
 @;
 are realized via message sending. There is no essential change to the logical
 protocol. The revised diagrams merely indicate how calls turn into TCP messages.
 
 Unless otherwise noted, the diagrams use the same conventions as
 @; KEEP ON ONE LINE 
-@secref{local protocol}. 
+@secref{sec:logic}. 
 
 @bold{Note} The diagrams specify far more than is necessary to understand the
 connection between a remote player and the server. These details are listed as a

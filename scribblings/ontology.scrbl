@@ -3,7 +3,7 @@
 @(require "shared.rkt")
 
 @; -----------------------------------------------------------------------------
-@title{@red{The Common Ontology}}
+@title[#:tag "sec:onto"]{@red{The Common Ontology}}
 
 For participants to connect players to the server, they need to understand the
 interaction protocols, both the logical protocol and the remote protocol. The

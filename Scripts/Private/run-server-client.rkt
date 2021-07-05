@@ -45,9 +45,21 @@
     (error 'xclient "port number expected, given ~e" port))
 
   (define named
-    (for/list ([p players] [i '[one two three four five six seven eight nine ten]])
-      (if (not p) (list #f #f) (list (~a "player" i) p))))
+    (for/list ([p players] [i (in-naturals)])
+      (define name (~a "P" (integer->string i)))
+      (if (not p) (list #f #f) (list name p))))
   (client named port #t ip))
+
+(define (integer->string i)
+  (cond
+    [(<= 0 i 9) (digit->string i)]
+    [else
+      (define mod (modulo i 10))
+      (define rem (remainder i 10))
+      (string-append (digit->string rem) (integer->string mod))]))
+
+(define (digit->string i)
+  (list-ref '["z" "o" "tw" "th" "fo" "fi" "si" "se" "e" "nine"] i))
 
 ;; ---------------------------------------------------------------------------------------------------
 (define (local-setup f)
