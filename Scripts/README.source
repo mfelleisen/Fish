@@ -94,6 +94,3 @@ promotoes only the winners of each game.
 - `xserver` currently does _not_ respect any options but it can and should use the same ones as `xtest`
 
 - There is currently no way to configure observers or attache them to games and tournaments.  They either exist or don't.
-
-| file | purpose |
-|--------------------- | ------- |

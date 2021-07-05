@@ -1,5 +1,7 @@
 #lang racket
 
+;; allocate a list of items to a list of buckets of max/min size 
+
 #| items ~ players 
 The manager starts by assigning them to games with the maximal number of participants permitted.
 Once the number of remaining players drops below the maximal number and can't form a game, the

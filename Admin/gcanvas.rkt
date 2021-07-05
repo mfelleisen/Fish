@@ -1,5 +1,7 @@
 #lang racket/gui
 
+;; a canvas 
+
 (provide
  #; (class (init-field pict0 : pict?) (eet (-> pict void?)))
  ;; show a Pict in the canvas 

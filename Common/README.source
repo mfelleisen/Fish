@@ -32,15 +32,3 @@ rules of engagement.
 **Note** The protocol part reveals too much about the internal
 organization but none of these revelations should affect safety,
 security, or fairness.
-
-| file | purpose |
-|--------------------- | ------- |
-| [board.rkt](board.rkt) | a board representation for "Fish.com" | 
-| [call-in-order.rkt](call-in-order.rkt) | a trace contract that checks the "referee promise" of calling all players | 
-| [fish.rkt](fish.rkt) | represents tiles with fish on them | 
-| [game-state.rkt](game-state.rkt) | represent the game state for "Fish.com" | 
-| [internal-player.rkt](internal-player.rkt) | represents the "ground truth" state of players: | 
-| [penguin.rkt](penguin.rkt) | characters that eat fish | 
-| [player-interface-error-reporting.rkt](player-interface-error-reporting.rkt) | print the history of how we got to an error in a trace contract | 
-| [player-interface.rkt](player-interface.rkt) | on the Administrative side, the player has contact with | 
-| [rules.rkt](rules.rkt) | the game rules, represented complete games as lazy game trees | 
