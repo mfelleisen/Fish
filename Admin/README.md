@@ -1,3 +1,3 @@
 ### The Logical Administrative Side
 
-the logical tournament manager, referee, and game observer (TODO)
+the logical tournament manager, referee, and game observer (todo)
