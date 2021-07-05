@@ -116,4 +116,13 @@ calls with respect to the server and the sample player in this repository.
 
 The repo consists of the following folders, with the links pointing to additinal "read me" files:
 
-
+| directory   | purpose									      |
+| ----------- | ----------------------------------------------------------------------------- |
+| [Common](Common/README.md) | the common ontology: understanding the communication between game server and client player | 
+| [Admin](Admin/README.md) | the logical tournament manager, referee, and game observer (todo) | 
+| [Scripts](Scripts/README.md) | scripts for observing games, playing games, testing remote players, and running tournaments | 
+| [Player](Player/README.md) | the logical sample player, both human and automated strategies | 
+| [Resources](Resources/README.md) | pictures | 
+| [Lib](Lib/README.md) | functionality that should probably exist in Racket's libraries | 
+| [Remote](Remote/README.md) | the remote proxy substitutes for the tournament manager, referee, and player | 
+| [scribblings](scribblings/README.md) | the source of the scribble documentation | 
