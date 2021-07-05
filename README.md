@@ -1,5 +1,22 @@
 ## The Fish Competition 
 
+The repository is a fully functioning game framework. The code is still a work-in-progress. See
+TODO at the end. 
+
+The repository is derived from my Fall 2020 Software Development course. I have changed the code
+base in many respects to explore some "research-y" topics and reduce the test time.
+
+
+### TODO
+
+- fix observers, xcall observers, otherwise the referee can crash when the observer crashes.
+  - closing the windows should shut down things 
+  - use eventspace-thread better? 
+
+- move the `trace` contract material into a branch. 
+- develop a `trace` contract for the tournament managers.
+  - observer: pause time
+
 ### Install
 
 If you wish to inspect the code easily and experiment with it, clone the repo and then install it: 
@@ -95,35 +112,30 @@ Since even a detailed interpretation may leave questions about their meaning wit
 rules of the game. the repository's `Common` directory publishes the code that interprets the remote
 calls with respect to the server and the sample player in this repository.
 
-### Warning, Credit 
+### Organization 
 
-The repository is fully functioning, but the code is a work-in-progress. See TODO below.
-
-The repository is derived from my Fall 2020 Software Development course, though I have changed
-the code base in several respects to explore some "research-y" topics. Its organization of the
-repo reflects this origin. It consists of 
+The repo consists of the following folders:
 
 | directory   | purpose									      |
 | ----------- | ----------------------------------------------------------------------------- |
-| Common      | the common ontology, documentation and code 				      |
+| Common      | the common ontology, code that is possibly useful for understanding/debugging rules/communication |
 | Admin	      | the logical tournament manager, the referee, and a game observer 	      |
 | Player      | the logical sample player, both human and automated strategies		      | 
 | Remote      | the remote proxy layers for the manager, referee, and player 		      | 
 | Scripts     | scripts for running games, tournaments, local and remote; integration `ITests`|
 | Lib	      | functionality that should probably exist in Racket's libraries	 	      |
 | Resources   | pictures      	   	  	   	    	     			      |
+| scribblings | the source of the scribble documentation 				      |
 
+The directories contain additional @tt{README}s so that readers can easily navigate the modules. 
 
-**Note** An independent development of a client for an existing server would produce a
-different organization. 
-
-### TODO
-
-- fix observers, xcall observers, otherwise the referee can crash when the observer crashes.
-  - closing the windows should shut down things 
-  - use eventspace-thread better? 
-
-- move the `trace` contract material into a branch. 
-- develop a `trace` contract for the tournament managers.
-  - observer: pause time
-
+| directory   | purpose									      |
+| ----------- | ----------------------------------------------------------------------------- |
+| Common | the common ontology: understanding the communication between game server and client player | 
+| Admin | the logical tournament manager, referee, and game observer | 
+| Scripts | scripts for observing games, playing games, testing remote players, and running tournaments | 
+| Player | the logical sample player, both human and automated strategies | 
+| Resources | pictures | 
+| Lib | functionality that should probably exist in Racket's libraries | 
+| Remote | the remote proxy substitutes for the tournament manager, referee, and player | 
+| scribblings | the source of the scribble documentation | 
