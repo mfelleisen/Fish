@@ -116,8 +116,6 @@ calls with respect to the server and the sample player in this repository.
 
 The repo consists of the following folders, with the links pointing to additinal "read me" files:
 
-
-
 | directory   | purpose									      |
 | ----------- | ----------------------------------------------------------------------------- |
 | [Common](Common/README.md) | the common ontology: understanding the communication between game server and client player | 
