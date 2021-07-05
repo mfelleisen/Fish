@@ -10,9 +10,11 @@ their remote player works properly with the provided server. Even then, it is
 still possible that a player gets disconnected/terminated due to time
 constraints or other problems.
 
-A tournament with 100 players on a single machines takes about 10s in user time.
-It is not clear how the server will perform on larger sets of players or in a
-truly distributed setting. 
+A tournament with 100 players on a single machines takes about 32s.  Running a
+distributed variant within a large metro@margin-note*{I know this says nothing
+real about how the network traffic is routed.} area takes some 3min. It is not
+clear how the server will perform on larger sets of players or in a distributed
+setting with large distances.
 
 @; -----------------------------------------------------------------------------
 @bold{Run a Distributed Tournament}
@@ -51,3 +53,6 @@ Here is a concrete example:
 (pointing 100 clients at 127.0.0.1 on port 12345)
 all done
 }
+
+TODO At the moment the information from the clients in the repo and the server
+is quite impoverished. One day I'll do something about it.
