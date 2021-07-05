@@ -41,7 +41,7 @@
 ;                                            
 
 (define (configure-server c)
-  (check-hash (get-hash-from-command-line c) tournament-defaults))
+  (check-hash (get-hash-from-command-line c) server-defaults))
   
 
 
@@ -206,7 +206,7 @@
      [fish . [,FISH ,(check-xyz 1 5 "number of fish per tile")]]
      [players . [,PLAYER# ,(or/c (listof any/c) (check-xyz 2 100 "players"))]]]))
 
-(define tournament-defaults
+(define server-defaults
   (extend-immutable-hash
    game-defaults
    `[[port . [,PORT ,(check-xyz 10000 65000 "port")]]
