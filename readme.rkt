@@ -11,8 +11,11 @@
   (with-output-to-file "README.md"
     #:exists 'append
     (λ () (printf (make-table adirs purps))))
+  ;; ---------------------------------
   (system "open README.md"))
 
+;; ---------------------------------------------------------------------------------------------------
+#; {[Listof PathString] [Listof String] -> String}
 (define (make-table adirs purps)
   (define content
     (for/list ([d adirs] [p purps])
@@ -33,24 +36,25 @@
 #; {[Path] -> [Setof PathString]}
 ;; EFFECT check git status, abort if not committed; then pull
 (define (git-status-check [which-one "./"])
-  (parameterize ((current-custodian (make-custodian))
-                 (current-directory which-one))
+  (parameterize ((current-directory which-one))
     (match-define (list in out pid err control) (process "git status"))
     (define status (port->list read-line in))
-    
-    (let loop ((status status))
-      (unless (empty? status)
-        (define l (first status))
-        (cond
-          [(regexp-match #px"Untracked" l)
-           (list->set
 
-           (let inner ([status (cdddr status)])
-            (define next (string-trim (first status)))
-            (cond
-              [(equal? "" next) '()]
-              [else (cons next (inner (rest status)))])))]
-          [else (loop (rest status))])))))
+    (begin0
+      (let loop ((status status))
+        (unless (empty? status)
+          (define l (first status))
+          (cond
+            [(regexp-match #px"Untracked" l)
+             (list->set
+
+              (let inner ([status (cdddr status)])
+                (define next (string-trim (first status)))
+                (cond
+                  [(equal? "" next) '()]
+                  [else (cons next (inner (rest status)))])))]
+            [else (loop (rest status))])))
+      (control 'kill))))
 
 (define header
   #<< here
