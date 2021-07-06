@@ -45,7 +45,7 @@
 ;                   ;                                                                              
 ;                                                                                                  
 
-(require Fish/Player/game-view)
+(require Fish/GUI/game-view)
 (require Fish/Player/game-control)
 (require Fish/Common/board)
 (require Fish/Common/game-state)

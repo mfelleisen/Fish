@@ -39,7 +39,7 @@
     
     (show-state
      ;; given a board and a score, show the current game state 
-     (->m pict? pict? any/c)))]))
+     (->i ([thiso any/c] [b pict?] [s pict?]) (#:text (t string?)) (r any/c))))]))
 
 ;                                                                                                  
 ;                                                                                                  
@@ -90,9 +90,9 @@
 
 (define game-frame%
   (class frame%
-    (init-field board0 score0)
+    (init-field board0 score0 (title TITLE))
     
-    (super-new [label TITLE] #;[stretchable-width #false] #;[stretchable-height #false])
+    (super-new [label title])
     
     (define vp (new vertical-panel% [parent this] [border 5] [style '(border)]))
     (define tx (new text-field% [parent vp] [label #false] [enabled #f] [font menu-control-font]))
@@ -112,14 +112,16 @@
     (define/public (choose board score myavatar control)
       (define (place-initial row-column gui-posn view-channel)
         (send control choose this row-column gui-posn view-channel))
-      (show-state board score (place-initial-avatar board myavatar) CHOOSE #:feedback place-initial))
+      (define places (place-initial-avatar board myavatar))
+      (show-state board score places #:text CHOOSE #:feedback place-initial))
     
     (define/public (take-turn board score myavatars control)
       (define (move-to row-column gui-posn view-channel)
         (send control take-turn this row-column gui-posn view-channel))
-      (show-state board score (place-avatars myavatars) TAKE #:feedback move-to))
+      (define places (place-avatars myavatars))
+      (show-state board score places #:text TAKE #:feedback move-to))
     
-    (define/public (show-state board score (avatars '[]) (text "") #:feedback (c void))
+    (define/public (show-state board score (avatars '[]) #:text (text "") #:feedback (c void))
       (send scan set score)
       (send tx set-value text)
       (send pboard replace (pict->snip board) avatars c)
