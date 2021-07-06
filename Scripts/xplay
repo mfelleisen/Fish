@@ -24,6 +24,7 @@ exec racket -tm "$0" -- ${1+"$@"}
 
 ;; ---------------------------------------------------------------------------------------------------
 (require Fish/Admin/referee)
+(require Fish/Admin/game-observer)
 (require Fish/Player/human)
 
 (require Fish/Scripts/Private/report-results)
@@ -38,6 +39,7 @@ exec racket -tm "$0" -- ${1+"$@"}
     (exit 1))
   (define the-human (new human%))
   (define state0  (make-state (cons the-human players)))
-  (match-define (list rankings failures) (referee state0 #:time-out 20))
-  (report-results names players rankings failures))
+  (match-define (list rankings failures) (referee state0 #:time-out 20 #:observers (list observer)))
+  (report-results names players rankings failures)
+  (sleep 20))
 
