@@ -6,12 +6,10 @@ TODO at the end.
 The repository is derived from my Fall 2020 Software Development course. I have changed the code
 base in many respects to explore some "research-y" topics and reduce the test time.
 
-
 ### TODO
 
-- fix observers, xcall observers, otherwise the referee can crash when the observer crashes.
+- xcall observers, otherwise the referee can crash when the observer crashes.
   - closing the windows should shut down things 
-  - use eventspace-thread better? 
 
 - move the `trace` contract material into a branch. 
 - develop a `trace` contract for the tournament managers.
@@ -115,8 +113,6 @@ calls with respect to the server and the sample player in this repository.
 ### Organization 
 
 The repo consists of the following folders, with the links pointing to additinal "read me" files:
-
-
 
 | directory | purpose |
 |--------------------- | ------- |

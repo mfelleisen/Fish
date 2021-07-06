@@ -1,15 +1,15 @@
 ## The Fish Competition 
 
-The repository is a fully functioning game framework. The code is still a work-in-progress. See
-TODO at the end. 
+The repository is a fully functioning game framework.  It is both an educational
+and a research project. The code is derived from my Fall 2020 course called
+"Software Development".  The "trace" branch is a first exploration of trace
+contracts "in the wild."
 
-The repository is derived from my Fall 2020 Software Development course. I have changed the code
-base in many respects to explore some "research-y" topics and reduce the test time.
+The code is still a work-in-progress. 
 
 ### TODO
 
-- xcall observers, otherwise the referee can crash when the observer crashes.
-  - closing the windows should shut down things 
+- closing the windows should shut down things 
 
 - move the `trace` contract material into a branch. 
 - develop a `trace` contract for the tournament managers.

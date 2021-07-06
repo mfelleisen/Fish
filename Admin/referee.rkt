@@ -587,7 +587,7 @@
       [(empty? observers) (remove* broken observers0)]
       [else 
        (define o1 (first observers))
-       (define void-failed (o1 state turn-legal))
+       (define void-failed (xcall o1 state turn-legal))
        (if (failed? void-failed)
            (loop (remove o1 (rest observers)) (cons o1 broken))
            (loop (rest observers) broken))])))
