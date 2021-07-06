@@ -120,11 +120,12 @@ The repo consists of the following folders, with the links pointing to additinal
 
 | directory | purpose |
 |--------------------- | ------- |
-| [Admin/README.md](Admin/README.md) | the logical tournament manager, referee, and game observer (todo) | 
-| [Common/README.md](Common/README.md) | the common ontology: understanding the communication between game server and client player | 
-| [Lib/README.md](Lib/README.md) | functionality that should probably exist in Racket's libraries | 
-| [Player/README.md](Player/README.md) | the logical sample player, both human and automated strategies | 
-| [Remote/README.md](Remote/README.md) | the remote proxy substitutes for the tournament manager, referee, and player | 
-| [Resources/README.md](Resources/README.md) | pictures | 
-| [Scripts/README.md](Scripts/README.md) | scripts for observing games, playing games, testing remote players, and running tournaments | 
-| [scribblings/README.md](scribblings/README.md) | the source of the scribble documentation | 
+| [Admin](Admin/README.md) | the logical tournament manager, referee, and game observer (todo) | 
+| [Common](Common/README.md) | the common ontology: understanding the communication between game server and client player | 
+| [GUI](GUI/README.md) | a game view and its supporting components | 
+| [Lib](Lib/README.md) | functionality that should probably exist in Racket's libraries | 
+| [Player](Player/README.md) | the logical sample player, both human and automated strategies | 
+| [Remote](Remote/README.md) | the remote proxy substitutes for the tournament manager, referee, and player | 
+| [Resources](Resources/README.md) | pictures | 
+| [Scripts](Scripts/README.md) | scripts for observing games, playing games, testing remote players, and running tournaments | 
+| [scribblings](scribblings/README.md) | the source of the scribble documentation | 

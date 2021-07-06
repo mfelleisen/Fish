@@ -5,11 +5,9 @@
 (define (main . x)
   (define show (empty? x))
   (define untracked (git-status-check))
-  (define adirs (for/list ([fd (directory-list)] #:when (good? untracked fd)) fd))
-  (define d-s (remove "scribblings" adirs))
-  (displayln d-s)
-  (readme d-s show)
-  (define afils (map (λ (d) (build-path d "README.md")) adirs))
+  (define adirs (for/list ([fd (directory-list)] #:when (good? untracked fd)) (path->string fd)))
+  (readme (remove "scribblings" adirs) show)
+  (define afils (map (λ (d) (list (build-path d "README.md") d)) adirs))
   (write-readme-and-show (make-header "directory") afils values show))
 
 ;; ---------------------------------------------------------------------------------------------------
@@ -17,10 +15,10 @@
 (define (readme adirs show)
   (for ([dir adirs]) 
     (parameterize ([current-directory dir])
-      (define afils (for*/list ([f (directory-list)] #:when (regexp-match #px"\\.rkt" f)) f))
+      (define afils (for*/list ([f (directory-list)] #:when (regexp-match #px"\\.rkt" f)) (list f f)))
       (write-readme-and-show (make-header "file") afils (λ (l) (substring l 3)) show))))
 
-#; {String [Listof PathString] [String -> String] Any -> Void}
+#; {String [Listof [List PathString String]] [String -> String] Any -> Void}
 (define (write-readme-and-show header afils clean show)
   (define purps (purpose-statements afils clean))
   (copy-file "README.source" "README.md" 'delete-existing-one)
@@ -29,17 +27,18 @@
     (λ () (printf (make-table header afils purps))))
   (when show (system "open README.md")))
 
-#; {String [Listof PathString] [Listof String] -> String}
+#; {String [Listof [List PathString String]] [Listof String] -> String}
 (define (make-table header adirs purps)
   (define content
     (for/list ([d adirs] [p purps])
-      (~a "| [" d "](" d ")" " | " p " | \n")))
+      (match-define (list dl dn) d)
+      (~a "| [" dn "](" dl ")" " | " p " | \n")))
   (apply string-append header content))
 
-#; {[Listof PathString] -> [Listof String]}
+#; {[Listof [List PathString String]] -> [Listof String]}
 (define (purpose-statements l clean)
   (for/list ([d l])
-    (with-input-from-file d
+    (with-input-from-file (first d)
       (λ ()
         (clean (string-trim (caddr (port->lines))))))))
 
