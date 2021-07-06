@@ -44,7 +44,8 @@
 ;                   ;                                                                              
 ;                                                                                                  
 
-(require Fish/Admin/gcanvas)
+(require Fish/GUI/game-view)
+(require Fish/GUI/gcanvas)
 (require (except-in Fish/Common/player-interface game-observer/c))
 (require Fish/Common/game-state)
 
@@ -71,52 +72,31 @@
 #; {observer : game-observer/c}
 (define (observer state0)
   (define es (make-eventspace))
-  (define-values (pict0 score0) (render-state state0))
+  (define-values (board-pict score-pict) (render-state state0))
   (parameterize ([current-eventspace es])
-    (define frame
-      (new frame% [label "game observer"] [stretchable-width #false] [stretchable-height #false]))
-    (define panel
-      (new horizontal-panel% [parent frame] [border 5] [style '(border)]))
-    (define fcan
-      (new gcanvas% [parent (vp panel)] [pict0 pict0]))
-    (define scan
-      (new gcanvas% [parent (vp panel)] [pict0 score0]))
-    (define text
-      (new text-field% [parent frame] [label #false] [font menu-control-font]))
-    (send frame show #t)
-    (callback es fcan scan text)))
-
+    (define gf (new game-frame% [board0 board-pict] [score0 score-pict] [title "OBSERVER"]))
+    (send gf show #t)
+    (callback es gf)))
+  
 ;; ---------------------------------------------------------------------------------------------------
-#; {EventSpace [Instance GCanvas] [Instance GCanvas] [Instance Text]
-               ->
-               [State (U String [List Action State]) -> Void]}
+#; {EventSpace [Instance GameFrame] -> [State (U String [List Action State]) -> Void]}
 ;; create a callback function that separately shows
 ;; -- the score resulting from this move and order of play,
 ;; -- the board with the penguins and the move 
-(define ((callback es fcan scan text) state legal-action)
+(define ((callback es gf) state legal-action)
   (parameterize ([current-eventspace es])
 
-    (define-values (state-pict score-pict)
+    (define-values (fall-asleep msg state-pict score-pict)
       (cond
         [(string? legal-action)
-         (send text set-value legal-action)
-         (render-state state)]
+         (define-values (a b) (render-state state))
+         (values (* 4 (sleep-time)) msg a b)]
         [else
          (match-define (list action state+) legal-action)
-         ;; this is model knowledge: design bug?
-         (define-values (state0-pict score0-pict)
-           (if (skip? action) (render-state state) (render-state state #:arrow action)))
-         (send text set-value "")
-         (render-state state+)]))
-    
-    (send fcan set state-pict)
-    (send scan set score-pict)
-    
-    (sleep (if (string? legal-action) (* 4 (sleep-time)) (sleep-time)))))
-
-#; {Window -> [Instance VerticalPanel]}
-(define (vp parent)
-  (new vertical-panel% [parent parent] [border 5] [style '(border)]))
+         (define-values (state0-pict score0-pict) (render-state state+))
+         (values (sleep-time) "" state0-pict score0-pict)]))
+    (queue-callback (λ () (send gf show-state state-pict score-pict #:text msg)))
+    (sleep fall-asleep)))
 
 ;; ---------------------------------------------------------------------------------------------------
 (module+ picts
