@@ -1,4 +1,4 @@
-#lang racket
+#lang racket/gui
 
 ;; a tournament manager that plays a complete tournament with players given ranked by "age"
 ;; and produces the list of first-placed players; it informs all non-cheaters whether they were
@@ -35,6 +35,7 @@
    (->i ([lop (and/c player*/c cons? distinct?)])
         (#:fixed [f (or/c #false natural?)]
          #:size (s (list/c natural? natural?))
+         #:t-observer (obs% class?)
          #:time-out (t-o positive?))
         (r results/c))]))
 
@@ -103,59 +104,80 @@
 
 #; {Player* -> Results}
 ;; produce a pair of the wunners and the cheaters 
-(define (manager lop0 #:time-out (t-o 3) #:fixed [f #f] #:size (s (list 5 5)))
+(define (manager lop0 #:time-out (t-o 3) #:fixed [f #f] #:size (s (list 5 5)) #:t-observer (obs% #f))
   (define run-one-game
     (if f
         (λ (lop) (referee #f #:size s #:time-out t-o #:lop lop #:fixed f))
         (λ (lop) (referee #f #:size s #:time-out t-o #:lop lop))))
 
+  (time-out-limit 3)
+  
   (match-define (list starters cheaters0)
     (inform-all/not-cheaters (λ (p msg) (xsend p start-of-tournament msg)) lop0 '[] '[]))
   
-  (define-values (ranks cheaters) (run-all-games starters run-one-game))
+  (define-values (ranks cheaters) (run-all-games starters run-one-game obs%))
   (define winners (first ranks))
+  
   (define cheaters1   (append cheaters0 cheaters))
   (define live-losers (filter (λ (p) (not (or (member p winners) (member p cheaters1)))) lop0))
   
   (inform-all/not-cheaters (λ (p msg) (xsend p end-of-tournament msg)) winners live-losers cheaters1))
 
 ;; ---------------------------------------------------------------------------------------------------
-#;{[Listof Player] Referee -> (values [Listof Player] [Listof Player])}
+#;{[Listof Player] Referee Observer -> (values [Listof Player] [Listof Player])}
 ;; generative recursion: terminates because either the number of players shrinks per round
 ;; or the tournament is forcibly stopped because the surviving winners all tie for first place
-(define (run-all-games lop0 run-one-game)
-  ;; accumulators: previous-winners and cheats 
-  (let loop ([lop1 lop0] [previous-winners '()] [cheats '()])
-    (define lop  (re-sort lop1 lop0))
-    (define lop# (length lop))
-    (cond
-      ;; not enough for one game 
-      [(< lop# MIN-PLAYERS) 
-       (values (list lop) cheats)]
-      ;; just enough for one game 
-      [(<= lop# MAX-PLAYERS)
-       (match-define [list ranked new-cheats] (run-one-game lop))
-       (values ranked (append new-cheats cheats))]
-      [else ;; keep going with rounds of games 
-       (match-define `[,winners ,new-cheats] (run-one-round-of-games lop run-one-game))
-       (if (equal? winners previous-winners)
-           (values winners (append new-cheats cheats))
-           (loop winners lop# (append new-cheats cheats)))])))
+(define (run-all-games lop0 run-one-game obs%)
+  (parameterize ([current-eventspace (make-eventspace)])
+
+    (define-syntax-rule (to-obs! method arg)
+      (when obs
+        (define result (xsend obs method arg))
+        (when (failed? result)
+          (set! obs #false))
+        (when (or (eq? 'method 'show-winners) (eq? 'method 'show-next-round))
+          (sleep 10))))
+
+    (define obs (and obs% (new obs% [players lop0])))
+    (to-obs! show #true)
+    ;; accumulators: previous-winners and cheats 
+    (let loop ([lop1 lop0] [previous-winners '()] [cheats '()])
+      (define lop  (re-sort lop1 lop0))
+      (define lop# (length lop))
+      (cond
+        ;; not enough for one game 
+        [(< lop# MIN-PLAYERS)
+         ;; observer
+         (values (list lop) cheats)]
+        ;; just enough for one game 
+        [(<= lop# MAX-PLAYERS)
+         (to-obs! show-next-round (list lop))
+         (match-define [list ranked new-cheats] (run-one-game lop))
+         (to-obs! show-winners (list (first ranked)))
+         (values ranked (append new-cheats cheats))]
+        [else ;; keep going with rounds of games
+         (define games (prepare-games MIN-PLAYERS MAX-PLAYERS lop))
+         (to-obs! show-next-round games)
+         (match-define `[,winners0 ,new-cheats] (run-one-round-of-games games run-one-game))
+         (to-obs! show-winners winners0)
+         (define winners (apply append winners0))
+         (if (equal? winners previous-winners)
+             (values winners (append new-cheats cheats))
+             (loop winners lop# (append new-cheats cheats)))]))))
 
 ;; ---------------------------------------------------------------------------------------------------
 #; {Player* Referee -> [List Player* Player*]}
-(define (run-one-round-of-games lop run-one-game)
-  (define games    (prepare-games MIN-PLAYERS MAX-PLAYERS lop))
+(define (run-one-round-of-games games run-one-game)
   (define results  (map run-one-game games))
   (define winners
-    (append-map first
-                (filter-map 
-                 (λ (r)
-                   (match-define [list ranked _] r)
-                   (match ranked
-                     ['[] #f]
-                     [_ ranked]))
-                 results)))
+    (map first
+         (filter-map 
+          (λ (r)
+            (match-define [list ranked _] r)
+            (match ranked
+              ['[] #f]
+              [_ ranked]))
+          results)))
   (define cheaters (append-map second results))
   (list winners cheaters))
 

@@ -53,6 +53,3 @@ Here is a concrete example:
 (pointing 100 clients at 127.0.0.1 on port 12345)
 all done
 }
-
-TODO At the moment the information from the clients in the repo and the server
-is quite impoverished. One day I'll do something about it.

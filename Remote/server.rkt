@@ -33,12 +33,13 @@
 (define FISH 'fish)
 (define ROWS 'rows)
 (define COLS 'cols)
+(define TOBS 'obs)
 
-(define server-options (list PORT SERVER-TRIES SERVER-WAIT T-PLAYERS TIME-PER-TURN FISH ROWS COLS))
+(define options (list PORT SERVER-TRIES SERVER-WAIT T-PLAYERS TIME-PER-TURN FISH ROWS COLS TOBS))
 
 (provide
  ;; server options 
- PORT SERVER-TRIES SERVER-WAIT T-PLAYERS TIME-PER-TURN FISH ROWS COLS
+ PORT SERVER-TRIES SERVER-WAIT T-PLAYERS TIME-PER-TURN FISH ROWS COLS TOBS
 
  (contract-out
   [server
@@ -47,8 +48,7 @@
    ;; runsning an manager on the players that connected on port# in time
    ;; plus the house players (if any) 
    ;; wait-for-sec seconds or N >= player# as soon as that many signed up 
-   (->i ([config (hash-carrier/c server-options)]) ([players any/c] )
-        (r results/c))]))
+   (->i ([config (hash-carrier/c options)]) ([players any/c]) (r results/c))]))
 
 ;                                                                                      
 ;       ;                                  ;                                           
@@ -134,7 +134,8 @@
   (define fish#         (dict-ref config FISH))
   (define row#          (dict-ref config ROWS))
   (define col#          (dict-ref config COLS))
-  (manager players #:time-out game-time-out #:fixed fish# #:size (list row# col#)))
+  (define obs%          (dict-ref config TOBS))
+  (manager players #:time-out game-time-out #:fixed fish# #:size (list row# col#) #:t-observer obs%))
 
 #;{Port# [Listof Player] Int Int Int -> [Listof Player]}
 (define (wait-for-players port house-players MAX-TRIES MAX-TIME MIN-PLAYERS MAX-PLAYERS)
@@ -217,6 +218,7 @@
        [rows . 5]
        [cols . 5]
        [fish . 2]
+       [obs  . #f]
        [players . 4]]))
 
 

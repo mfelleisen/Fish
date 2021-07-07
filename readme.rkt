@@ -24,7 +24,7 @@
   (copy-file "README.source" "README.md" 'delete-existing-one)
   (with-output-to-file "README.md"
     #:exists 'append
-    (λ () (printf (make-table header afils purps))))
+    (λ () (printf "~a" (make-table header afils purps))))
   (when show (system "open README.md")))
 
 #; {String [Listof [List PathString String]] [Listof String] -> String}
@@ -73,4 +73,5 @@
    "|--------------------- | ------- |\n"))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module+ main (main 'dontshow))
+(module+ main
+  (main 'dontshow))

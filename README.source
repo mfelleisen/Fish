@@ -15,6 +15,13 @@ The code is still a work-in-progress.
 - develop a `trace` contract for the tournament managers.
   - observer: pause time
 
+#### Ideas
+
+- the tournament observer for `xtest` is primtive and uses too much space for large tournaments
+- add names to players and use those for observers and for reporting outcomes
+  - use the short strings for sign up
+  - make them unique 
+
 ### Install
 
 If you wish to inspect the code easily and experiment with it, clone the repo and then install it: 

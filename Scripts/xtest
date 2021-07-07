@@ -24,9 +24,6 @@ exec racket -tm "$0" -- ${1+"$@"}
 ;; This sets up four house players and starts `x1client port` as an external process.
 ;; `x1client` sets up a standard, greedy player that displays each (remote) method call to STDOUT.
 
-;; TODO:
-;; -- include the specification for an internal observer
-
 (provide main)
 
 ;; ---------------------------------------------------------------------------------------------------
@@ -34,6 +31,8 @@ exec racket -tm "$0" -- ${1+"$@"}
 (require Fish/Scripts/Private/run-server-client)
 (require Fish/Player/player)
 (require Fish/Player/greedy)
+(require Fish/Admin/tournament-observer)
+(require (only-in Fish/Remote/server TOBS))
 
 (require SwDev/Testing/harness)
 (require SwDev/Testing/communication)
@@ -44,9 +43,12 @@ exec racket -tm "$0" -- ${1+"$@"}
 
 (define (main path-to . c)
   (define h (configure-server c))
+  (set! h (hash-set h TOBS tournament-observer%))
+  (define port (dict-ref h 'port))
+  
   (define players (build-list (dict-ref h 'players) (λ _ (new player% [strategy (new strategy%)]))))
   (define-values (s-in _1 tear-down-server) (local-setup (λ () (run-server h #:house players))))
-  (define-values (r-in _2 tear-down-remote) [(make-setup path-to `(,(~a (dict-ref h 'port))) values)])
+  (define-values (r-in _2 tear-down-remote) [(make-setup path-to `(,(~a port)) values)])
 
   (define th
     (thread
@@ -62,6 +64,9 @@ exec racket -tm "$0" -- ${1+"$@"}
     (displayln `[the result produced by the server ,(read-message s-in)]))
   
   (tear-down-server)
-
   (sync/timeout 3 th)
   (tear-down-remote))
+
+;; ---------------------------------------------------------------------------------------------------
+(module+ picts
+  (main "./x1client" "players = 4"))

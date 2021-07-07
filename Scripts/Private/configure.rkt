@@ -204,6 +204,7 @@
      [rows . [,ROWS ,(check-xyz 2 9 "number of rows")]]
      [cols . [,COLS ,(check-xyz 2 9 "number of columns")]]
      [fish . [,FISH ,(check-xyz 1 5 "number of fish per tile")]]
+     [obs  . [#false values]]
      [players . [,PLAYER# ,(or/c (listof any/c) (check-xyz 2 100 "players"))]]]))
 
 (define server-defaults
