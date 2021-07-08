@@ -211,7 +211,7 @@
   (define config 
     (make-immutable-hash
      `[[port . 45670]
-       [server-wait . 40]
+       [server-wait . 20]
        [t-players . 5]
        [server-tries . 1]
        [time-per-turn . 10]
