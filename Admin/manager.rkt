@@ -35,7 +35,7 @@
    (->i ([lop (and/c player*/c cons? distinct?)])
         (#:fixed [f (or/c #false natural?)]
          #:size (s (list/c natural? natural?))
-         #:t-observer (obs% class?)
+         #:t-observer (obs% (or/c #false class?))
          #:time-out (t-o positive?))
         (r results/c))]))
 
