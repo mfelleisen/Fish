@@ -10,10 +10,7 @@ The code is still a work-in-progress.
 ### TODO
 
 - closing the windows should shut down things 
-
-- move the `trace` contract material into a branch. 
-- develop a `trace` contract for the tournament managers.
-  - observer: pause time
+- observer: pause time
 
 #### Ideas
 

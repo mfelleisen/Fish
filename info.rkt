@@ -20,7 +20,6 @@
      "htdp-lib"
      "gregor-lib"
      "gui-lib"
-     "trace-contract"
      "racket-doc"
      "profile-lib"
      "rackunit-lib"

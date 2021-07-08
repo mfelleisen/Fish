@@ -77,9 +77,6 @@
 (require Fish/Common/game-state)
 (require Fish/Common/board)
 (require Fish/Common/penguin)
-(require Fish/Common/call-in-order)
-
-(require trace-contract)
 
 ;                                                                          
 ;                                                                          
@@ -170,38 +167,21 @@
 ;; ---------------------------------------------------------------------------------------------------
 ;; contracts on referees
 
-#; {Contract -> Contract}
-(define (make-referee/c player*/c)
+;; a plain referee contract that checks less 
+(define referee/c
   (->i ([f (or/c #false fishes?)])
        ;; the alternative interface was added after the fact
        ;; so that a referee ca be launched with just a list of players
        ;; plus optional arguments for creating a random state from scratch 
        [#:time-out  (t-o positive?)
         #:lop       (lop (f) (if (boolean? f)
-                                 (and/c player*/c
+                                 (and/c (listof player/c)
                                         (property/c length (between/c MIN-PLAYERS MAX-PLAYERS)))
                                  (λ _ #t)))
         #:size      (r-w (list/c natural? natural?))
         #:fixed     (fix  natural?) 
         #:observers (o (listof game-observer/c))]
-       ;; MF: I am not quite sure why it is okay to return traced players (reset?)
-       ;; Because we re-enter referee and get new players anyways!?!!? 
-       (r (list/c (listof player*/c) player*/c))))
-
-;; a referee contract that checks the promise about call-back ordering 
-(define referee/c
-  (trace/c ([this/c    any/c]
-            [state/c   fishes?]
-            [actions/c [listof turn?]]
-            [player*/c (listof (instanceof/c (make-referee-player%/c this/c state/c actions/c)))])
-    (make-referee/c player*/c)
-    #:fold [(this/c state/c actions/c player*/c)
-            call-players-in-given-order-unless-skipped
-            #:fail-when not
-            #:recover (λ _ '())]))
-
-;; a plain referee contract that checks less 
-(define simple-referee/c (make-referee/c (listof player/c)))
+       (r (list/c (listof (listof player/c)) (listof player/c)))))
 
 ;                                                                          
 ;                                                                          
