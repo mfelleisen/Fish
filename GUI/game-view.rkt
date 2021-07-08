@@ -58,9 +58,9 @@
 ;                   ;                                                                              
 ;                                                                                                  
 
-(require Fish/Player/game-pasteboard)
-(require Fish/Player/game-image-snip)
-(require Fish/Admin/gcanvas)
+(require Fish/GUI/game-pasteboard)
+(require Fish/GUI/game-image-snip)
+(require Fish/GUI/gcanvas)
 (require (only-in Fish/Common/board posn-row posn-column))
 (require Fish/Lib/toint)
 (require (except-in pict pict?))

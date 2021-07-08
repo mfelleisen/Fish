@@ -22,7 +22,7 @@
 ;                                                                  
 ;                                                                  
 
-(require (only-in Fish/Player/game-image-snip game-image-snip%))
+(require (only-in Fish/GUI/game-image-snip game-image-snip%))
 (require (only-in Fish/Common/board posn/c))
 
 (provide

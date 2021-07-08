@@ -1,6 +1,6 @@
 #lang racket/gui
 
-;; a primitie tournament observer
+;; a primitive tournament observer
 
 ;                                                          
 ;                                                          
