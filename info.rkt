@@ -2,7 +2,7 @@
 (define collection "Fish")
 (define pkg-desc "derived from the source for the Fall 2020 Sw Dev project")
 (define pkg-authors '(matthias))
-(define version "0.9")
+(define version "1.0")
 
 (define sw-dev "git://github.com/mfelleisen/SwDev.git")
 

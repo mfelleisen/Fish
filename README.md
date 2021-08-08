@@ -10,7 +10,8 @@ The code is still a work-in-progress.
 ### TODO
 
 - closing the windows should shut down things 
-- observer: pause time
+  - observer: pause time
+- develop a `trace` contract for the tournament managers.
 
 #### Ideas
 
