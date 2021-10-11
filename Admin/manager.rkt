@@ -161,9 +161,10 @@
          (match-define `[,winners0 ,new-cheats] (run-one-round-of-games games run-one-game))
          (to-obs! show-winners winners0)
          (define winners (apply append winners0))
+
          (if (equal? winners previous-winners)
-             (values winners (append new-cheats cheats))
-             (loop winners lop# (append new-cheats cheats)))]))))
+             (values (list winners) (append new-cheats cheats))
+             (loop winners winners #;lop# (append new-cheats cheats)))]))))
 
 ;; ---------------------------------------------------------------------------------------------------
 #; {Player* Referee -> [List Player* Player*]}
