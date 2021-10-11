@@ -98,7 +98,7 @@
 ;; internally, the player is game mechanics while the strategy component makes game decisions 
 
 (define base-player%
-  (class object% (init-field strategy)
+  (class object% (init-field strategy [name (gensym)])
     (field (me  (first penguin-colors)))
     (field (other-players '()))
     (field (tree #false))
