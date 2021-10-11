@@ -1,11 +1,11 @@
 #!/bin/bash 
 
-XSTRESS=xstress=trace
-
-echo "gc-ing" 
-rm -rf *~ */*~ ; rm -rf errors.txt 
+XSTRESS=../Benchmark/xstress-trace.out
 
 echo "making"
-raco make xbench 
+raco make xbench
+if [ ! -f $XSTRESS ] ; then
+    echo "start: " $XSTRESS > $XSTRESS ;
+fi 
 
-gtime raco test ./xbench 
+gtime raco test ./xbench  2>>  $XSTRESS 

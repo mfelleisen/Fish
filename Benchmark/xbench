@@ -84,7 +84,7 @@ exec racket -tm "$0" -- ${1+"$@"}
   (define (make-in r c f d p)
     (make-hasheq `([row . ,r] [column . ,c] [fish . ,f] [players . ,(map (λ (p) (list p d)) p)])))
 
-  (recording "Tests/")
+  ; (recording "Tests/")
   (start-at 0)
 
   ;; single-game tournament to confirm functionality 

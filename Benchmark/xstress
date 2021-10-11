@@ -1,0 +1,21 @@
+#!/bin/bash 
+
+rm -rf *.out 
+
+for i in 1 2 3 4 5  
+do
+    ./xstress-trace 
+done
+
+for i in 1 2 3 4 5  
+do
+    ./xstress-load-free
+done
+
+for i in 1 2 3 4 5  
+do
+    ./xstress-no-trace 
+done
+
+./measured.rkt
+

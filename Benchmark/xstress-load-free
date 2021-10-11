@@ -1,19 +1,19 @@
 #!/bin/bash 
 
-XSTRESS=../Benchmark/xstress-no-trace.out 
+XSTRESS=../Benchmark/xstress-load-free.out
 
 echo "swap"
 pushd ../Common/
-cp player-interface-without-trace.rkt player-interface.rkt
+cp player-interface-no-load.rkt player-interface.rkt
 popd
 
 echo "making"
-raco make xbench
+raco make xbench 
 if [ ! -f $XSTRESS ] ; then
     echo "start: " $XSTRESS > $XSTRESS ;
 fi 
 
-gtime raco test ./xbench 2>> $XSTRESS 
+gtime raco test ./xbench 2>>  $XSTRESS 
 
 echo "swap back"
 pushd ../Common/
