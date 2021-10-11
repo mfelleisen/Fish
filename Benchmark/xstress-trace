@@ -1,0 +1,11 @@
+#!/bin/bash 
+
+XSTRESS=xstress=trace
+
+echo "gc-ing" 
+rm -rf *~ */*~ ; rm -rf errors.txt 
+
+echo "making"
+raco make xbench 
+
+gtime raco test ./xbench 

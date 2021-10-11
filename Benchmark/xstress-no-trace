@@ -1,0 +1,22 @@
+#!/bin/bash 
+
+XSTRESS=xstress-no-trace 
+
+echo "gc-ing" 
+rm -rf *~ */*~ ; rm -rf errors.txt 
+
+echo "swap"
+pushd ../Common/
+cp player-interface-without-trace.rkt player-interface.rkt
+popd
+
+echo "making"
+raco make xbench 
+
+gtime raco test ./xbench
+
+echo "swap back"
+pushd ../Common/
+git checkout player-interface.rkt
+popd
+

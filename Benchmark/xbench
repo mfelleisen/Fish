@@ -1,0 +1,110 @@
+#! /bin/sh
+#| -*- racket -*-
+exec racket -tm "$0" -- ${1+"$@"}
+|#
+#lang racket
+
+(define T# 100)
+
+(provide main)
+
+;; ---------------------------------------------------------------------------------------------------
+(require "get.rkt")
+
+(require Fish/Admin/manager)
+(require Fish/Player/player)
+(require Fish/Player/greedy)
+
+(require SwDev/Testing/communication)
+(require SwDev/Lib/pattern-matching)
+
+(module+ test 
+  (require SwDev/Testing/testing))
+
+;; ---------------------------------------------------------------------------------------------------
+(define (main)
+  (define run (get game-description 'xref ""))
+  (define result (run))
+  (send-message (first result)))
+
+#; {JSexpr -> False or (-> [List Ranking [Listof Player]])}
+(define (game-description j)
+  ;; the input pattern 
+  (def/mp object (_ r c p f d)
+    #'(hash-table
+       ('row     (? natural? r))
+       ('column  (? natural? c))
+       ('fish    (? natural? f))
+       ('players (list (list (? string? p) d) (... ...)))))
+  ;; go:
+  (match j
+    [(object r c p f dx) (run r c p f dx)]
+    [_ #false]))
+
+#; {N N N [Listof String : ordered] N N -> [-> Rankings]}
+;; create a thunk that creates
+;; -- one player per name in `names`, each using the greedy strategy, 
+;; -- runs the tournament 
+(define ((run r c names f depths))
+  (define players (map (λ (n d) (new player% [name n] [strategy (new strategy%)])) names depths))
+  (define named-p (map list players names))
+  (match-define `[,firsts ,failed]
+    (cond
+      [(<= (length players) 4)
+       (manager players #:fixed f #:size (list r c))]
+      [else
+       (for ([i (in-range T#)])
+         (manager players #:fixed f #:size (list r c)))
+       (manager players #:fixed f #:size (list r c))]))
+        
+  (when (cons? failed) `[timed out players: ,failed])
+  (list 
+   (sort (for/list ([p firsts]) (second (assoc p named-p))) string<=?)
+   (sort (for/list ([p failed]) (second (assoc p named-p))) string<=?)))
+
+;                                  
+;                                  
+;                                  
+;     ;                       ;    
+;     ;                       ;    
+;   ;;;;;;   ;;;;    ;;;;   ;;;;;; 
+;     ;     ;    ;  ;    ;    ;    
+;     ;     ;;;;;;  ;         ;    
+;     ;     ;        ;;;;     ;    
+;     ;     ;            ;    ;    
+;     ;     ;;   ;  ;    ;    ;    
+;      ;;;   ;;;;;   ;;;;      ;;; 
+;                                  
+;                                  
+;                                  
+;                                  
+
+(module+ test
+
+  (define (make-in r c f d p)
+    (make-hasheq `([row . ,r] [column . ,c] [fish . ,f] [players . ,(map (λ (p) (list p d)) p)])))
+
+  (recording "Tests/")
+  (start-at 0)
+
+  ;; single-game tournament to confirm functionality 
+  (define in1 (make-in 2 5 1 1 '("a" "b")))         (define out1 '["a"])
+  (define in2 (make-in 5 2 1 2 '("a" "b")))         (define out2 `["a" "b"])
+  (define in3 (make-in 5 5 1 2 '("a" "b" "c")))     (define out3 '["a"])
+  (define in4 (make-in 5 5 5 2 '("a" "b" "c" "d"))) (define out4 '["a" "d"])
+  (define in5 (make-in 4 3 1 2 '("a" "b" "c" "d"))) (define out5 '("a" "b" "c" "d"))
+
+  (r-check-equal? main `[,in1] `[,out1] " 2 x 5 - depth: 1")
+  (r-check-equal? main `[,in3] `[,out3] " 5 x 5 - depth: 2, players: 3")
+  (r-check-equal? main `[,in4] `[,out4] " 5 x 5 - depth: 2, players: 4")
+  (r-check-equal? main `[,in2] `[,out2] " 5 x 2 - depth: 2")
+  (r-check-equal? main `[,in5] `[,out5] " 3 x 2 - depth: 2")
+
+  (define a (char->integer #\a))
+  (define A (char->integer #\A))
+  (define tplayers (append (build-list 26 (λ (i) (string (integer->char (+ a i)))))
+                           (build-list 26 (λ (i) (string (integer->char (+ A i)))))))
+  (define tournament1 (make-in 4 3 3 1 tplayers))
+
+  ;; we will use this one to run a bunch of tournaments 
+  (r-check-equal? main `[,tournament1] `[,(sort tplayers string<?)] "tournament"))
