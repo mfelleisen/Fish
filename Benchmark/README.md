@@ -1,27 +1,49 @@
-## Stress Testing 
+## Stress Testing for the Traced Fish Project
 
-Two scripts to compare running the program with or without trace contracts: 
-
-1. Stress test with the trace contract turned on: 
+Run 
 
 ```
-./xstress-trace
+./xstress
 ```
 
-2. Stress test without the trace contracts: 
-
-
-The next one copies the trace-free interface into the place of the interface,
-and when the test is finished, does a git-checkout of the original. This is a
-bit fragile in case something blows up. The idea solution would be to have
-syntax-parameterized modules but alas, we don't. 
+The outcome is something like this:
 
 ```
-./xstress-no-trace
+--- measuring ---
+'("16.6" "start:  ../Benchmark/xstress-no-trace.out")
+'("81.1" "start:  ../Benchmark/xstress-trace.out")
+'("20.0" "start:  ../Benchmark/xstress-trace-no-load.out")
 ```
 
+These timings are highly inaccurate, because it's just running five bash scripts five times.
 
-Both scripts run five one-game tests to make sure things work out,
-and then run 101 tournaments with 46 players each. The players use
-the gredy strategy, which has the strange effect that all 46 players
-end up with the same score and are all winners.
+- `xstress`
+- `xstress-no-trace`
+- `xstress-trace-no-load`
+
+
+[ The names are suggestive. ]
+
+Each of those compiles and then runs the test submodule of
+
+- `xbench`
+
+The final step is to run `measure.rkt` on the `*.out` files, which
+collect the timing results. 
+
+### The Benchmark
+
+The benchmark runs a small number of tournaments as many times as `T#`
+specifies. The variable is defined at the top:
+
+
+```
+(define T# 10) ;; how many times each tournament is run 
+```
+
+The tournaments rank from 5 players to 27 players, so one game to many
+games in a row.
+
+The benchmark includes a correctness check so changes to the code base
+don't break the measurements (or we discover them quickly).
+
