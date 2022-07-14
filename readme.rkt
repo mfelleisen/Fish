@@ -2,11 +2,13 @@
 
 ;; create the README.md files from README.source in the top-level and all code directories 
 
+(define ignore '["Benchmark" "scribblings"])
+
 (define (main . x)
   (define show (empty? x))
   (define untracked (git-status-check))
   (define adirs (for/list ([fd (directory-list)] #:when (good? untracked fd)) (path->string fd)))
-  (readme (remove "scribblings" adirs) show)
+  (readme (remove* ignore adirs) show)
   (define afils (map (λ (d) (list (build-path d "README.md") d)) adirs))
   (write-readme-and-show (make-header "directory") afils values show))
 

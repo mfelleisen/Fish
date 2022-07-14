@@ -42,5 +42,8 @@ security, or fairness.
 | [internal-player.rkt](internal-player.rkt) | represents the "ground truth" state of players: | 
 | [penguin.rkt](penguin.rkt) | characters that eat fish | 
 | [player-interface-error-reporting.rkt](player-interface-error-reporting.rkt) | print the history of how we got to an error in a trace contract | 
+| [player-interface-no-load.rkt](player-interface-no-load.rkt) | on the Administrative side, the player has contact with | 
+| [player-interface-no-load.rkt~](player-interface-no-load.rkt~) | on the Administrative side, the player has contact with | 
+| [player-interface-without-trace.rkt](player-interface-without-trace.rkt) | on the Administrative side, the player has contact with | 
 | [player-interface.rkt](player-interface.rkt) | on the Administrative side, the player has contact with | 
 | [rules.rkt](rules.rkt) | the game rules, represented complete games as lazy game trees | 

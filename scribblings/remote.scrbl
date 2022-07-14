@@ -9,6 +9,7 @@
 @(require Fish/Common/fish)
 @(require "shared.rkt")
 @(require (only-in racket ~a ~s file->lines))
+@(require racket/runtime-path)
 
 @(define POSITION 'position)
 
@@ -20,8 +21,10 @@
        lines))
    (apply verbatim #:indent 4 lines))
 
-@(define (to-fish file) 
-   (build-path (getenv "HOME") "Hub" "Fish" "Common" (~a "remote-" file)))
+@(define-runtime-path FishCommon "../Common/")
+
+@(define (to-fish file)
+   (build-path FishCommon (~a "remote-" file)))
 
 @; -----------------------------------------------------------------------------
 @title[#:tag "sec:remote"]{@red{CO: Remote Interactions}}
