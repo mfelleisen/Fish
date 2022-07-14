@@ -2,6 +2,7 @@
 
 @(require "shared.rkt")
 @(require (only-in racket file->lines))
+@(require racket/runtime-path)
 
 @(define (include-protocol file)
    (define lines  
@@ -11,8 +12,10 @@
        lines))
    (apply verbatim #:indent 4 lines))
 
-@(define (to-fish file) 
-   (build-path (getenv "HOME") "Hub" "Fish" "Common" file))
+@(define-runtime-path FishCommon "../Common/")
+
+@(define (to-fish file)
+   (build-path FishCommon file))
 
 @; -----------------------------------------------------------------------------
 @title[#:tag "sec:logic"]{@red{CO: Logical Interactions}}
