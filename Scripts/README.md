@@ -56,7 +56,7 @@ Here is a table of _all_ options, their defaults, and their legal values:
 | cols		| the number of columns of the game board			      | 6  | [2,9]	|
 | fish 		| a fixed number of fish displayed on a tile			      | false | [1,5] 	|
 |  		| or a randomly chosen one (`false`)  			      	      |       |  	|
-| port		| the port on which server and client communicate		      | 45678 |	[10000,65000] |
+| port		| the port on which server and client communicate		      | 45678 |	(10000,60000) |
 | server-wait	| the number of seconds that the server waits to sign up `t-players`  |	30    | natural	      |
 | server-tries  | the number of times a server repeats the waiting period	      |  1    | natural       |
 | t-players	| the minimum number of players needed to run a tournament	      |  5    | [5,100]	      |
