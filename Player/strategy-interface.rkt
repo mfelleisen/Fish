@@ -28,6 +28,7 @@
 (require (only-in Fish/Common/board posn/c))
 
 (provide
+ tie-breaker
  (contract-out
   (base-strategy%
    (class/c
