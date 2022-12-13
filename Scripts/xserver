@@ -13,7 +13,7 @@ exec racket -W error -tm "$0" -- ${1+"$@"}
 (require Fish/Scripts/Private/configure)
 
 ;; ---------------------------------------------------------------------------------------------------
-(define (main . p-str)
-  (define p (configure-server (cons "port = " p-str)))
+(define (main p-str)
+  (define p (configure-server (list "port = " p-str)))
   (pretty-print `[starting a server on ,p])
   (run-server p))
