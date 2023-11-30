@@ -103,7 +103,7 @@
 #; {type Action  = }
 
 #; {Player* -> Results}
-;; produce a pair of the wunners and the cheaters 
+;; produce a pair of the winners and the cheaters
 (define (manager lop0 #:time-out (t-o 3) #:fixed [f #f] #:size (s (list 5 5)) #:t-observer (obs% #f))
   (define run-one-game
     (if f

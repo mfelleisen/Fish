@@ -1,6 +1,6 @@
 #lang racket
 
-;; specify a strategt class with contract 
+;; specify a strategy class with contract
 
 ;; A strategy is defined as two methods:
 ;; -- one for helping a player pick a place during the placement phase of the game
@@ -38,7 +38,7 @@
 
     (move-penguin
      ;; SANITY CHECK: the color of this player is the color of the first player in the state
-     ;; reteturn action, lexicograpphically closest to ORIGIN
+     ;; return action, lexicographically closest to ORIGIN
      #; #false           ;; -- when the state is final
      #; turn?            ;; -- when a player can skip or move 
      (->m tree? (or/c #false turn?)))
@@ -53,7 +53,7 @@
       ;; -- the max of the list of "valued" elements
       ;; -- the list oe "valued" elements
       ;; and expects the list of alternative candidates
-      ;; If this resuult is empty, `choose` picks an element of the maximum-valued elements
+      ;; If this result is empty, `choose` picks an element of the maximum-valued elements
       (->m real? [listof [list/c any/c real?]] any/c)))
      
     (evaluate
