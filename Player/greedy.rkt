@@ -2,7 +2,7 @@
 
 ;; implement a simple greedy strategy:
 ;; -- place penguins on a tile with maximal fish number 
-;; -- move he penguin to a tile with maximal fish number
+;; -- move the penguin to a tile with maximal fish number
 ;;;   using the `tiebreaker` if there are several 
 
 
@@ -113,7 +113,7 @@
 (define (move-penguin t) (send g move-penguin t))
 
 (module+ examples
-  #; (define-stntax name ...)
+  #; (define-syntax name ...)
   ;; generates a state `name` and its tree named `tree-name` and its picture named `pict-name`
   (define-syntax (define-state stx)
     (syntax-parse stx

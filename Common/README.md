@@ -9,7 +9,7 @@ the common ontology between external players and the server.
 
 - `player-interface` describes how the service side interacts with players 
 - `rules` a data representation for both checking the legality of turns and planning them
-- `game-state` a data representation of game states: board, orderig of players, knowledge about players 
+- `game-state` a data representation of game states: board, ordering of players, knowledge about players
 - `internal-player` a representation of the knowledge about the players currently in the game 
 - `board` a representation of the game board
 - `fish` basic constants for the fish tiles
