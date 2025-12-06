@@ -34,7 +34,7 @@ exec racket -tm "$0" -- ${1+"$@"}
 (require Fish/Admin/tournament-observer)
 (require (only-in Fish/Remote/server TOBS))
 
-(require SwDev/Testing/harness)
+(require (except-in SwDev/Testing/harness unset-time-out))
 (require SwDev/Testing/communication)
 
 ;; ---------------------------------------------------------------------------------------------------

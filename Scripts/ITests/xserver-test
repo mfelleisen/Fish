@@ -11,7 +11,7 @@ exec racket -tm "$0" -- ${1+"$@"}
 ;; ---------------------------------------------------------------------------------------------------
 (require Fish/Scripts/Private/run-server-client)
 (require SwDev/Testing/communication)
-(require SwDev/Testing/harness)
+(require (except-in SwDev/Testing/harness unset-time-out))
 (require SwDev/Testing/make-client)
 
 (require (submod Fish/Admin/manager examples))

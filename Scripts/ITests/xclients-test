@@ -11,7 +11,7 @@ exec racket -W error -tm "$0" -- ${1+"$@"}
 ;; ---------------------------------------------------------------------------------------------------
 (require 20SwDev/Code/10/run-server-client)
 (require SwDev/Testing/communication)
-(require SwDev/Testing/harness)
+(require (except-in SwDev/Testing/harness unset-time-out))
 (require (submod Fish/Admin/manager examples))
 
 ;; ---------------------------------------------------------------------------------------------------
