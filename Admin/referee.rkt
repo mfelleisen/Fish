@@ -224,8 +224,21 @@
   (map (λ (group) (map iplayer-payload group)) ranking))
 
 (module+ test
-  (check-equal? (caaar (referee #f #:lop (list r-player1  player1))) player1 "random vs good player")
-  
+
+  (check-equal?
+    (parameterize ([current-pseudo-random-generator (make-pseudo-random-generator)])
+	  (random-seed 12345)
+	  (caaar (referee #f #:lop (list r-player1  player1))))
+	player1
+    "good player usually beats random player")
+
+  (check-equal?
+    (parameterize ([current-pseudo-random-generator (make-pseudo-random-generator)])
+	  (random-seed 1808910397)
+	  (caaar (referee #f #:lop (list r-player1  player1))))
+	r-player1
+    "sometimes some boards random player beats greedy player")
+
   (check-equal? (caar (referee state-2-9-with-three-regular-players)) players-1-2-3 "3 good ones")
   (check-equal? (caar (referee istate-2-9-with-three-regular-players)) iplayers-1-2-3 "3 i-good ones")
 
